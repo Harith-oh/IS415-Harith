@@ -4,11 +4,11 @@ project:
 website:
   title: "IS415-Harith"
   navbar:
-  left:
-    - text: "Hands-on Exercise"
-      menu:
-        - text:"Hands-on Exercise 1"
-          href:"Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html"
+    left:
+      - text: "Hands-on Exercise"
+        menu:
+          - text:"Hands-on Exercise 1"
+            href:"Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html"
     right:
       - href: index.qmd
         text: Home
