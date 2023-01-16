@@ -10,7 +10,7 @@ editor: visual
 
 # Setting the scene
 
-Water is an important resource to mankind. Clean and accessible water is critical to human health. It provides a healthy environment, a sustainable economy, reduces poverty and ensures peace and security. Yet over 40% of the global population does not have access to sufficient clean water. By 2025, 1.8 billion people will be living in countries or regions with absolute water scarcity, according to UN-Water. The lack of water poses a major threat to several sectors, including food security. Agriculture uses about 70% of the world\'s accessible freshwater.
+Water is an important resource to mankind. Clean and accessible water is critical to human health. It provides a healthy environment, a sustainable economy, reduces poverty and ensures peace and security. Yet over 40% of the global population does not have access to sufficient clean water. By 2025, 1.8 billion people will be living in countries or regions with absolute water scarcity, according to UN-Water. The lack of water poses a major threat to several sectors, including food security. Agriculture uses about 70% of the world's accessible freshwater.
 
 Developing countries are most affected by water shortages and poor water quality. Up to 80% of illnesses in the developing world are linked to inadequate water and sanitation. Despite technological advancement, providing clean water to the rural community is still a major development issues in many countries globally, especially countries in the Africa continent.
 
@@ -21,6 +21,7 @@ To address the issue of providing clean and sustainable water supply to the rura
 Geospatial analytics hold tremendous potential to address complex problems facing society. In this study, you are tasked to apply appropriate geospatial data wrangling methods to prepare the data for water point mapping study. For the purpose of this study, Nigeria will be used as the study country.
 
 # 
+
 The Data
 
 ### **Aspatial data**
@@ -42,3 +43,46 @@ The specific tasks of this take-home exercise are as follows:
 -   Combining the geospatial and aspatial data frame into simple feature data frame.
 
 -   Visualising the distribution of water point by using appropriate analytical visualisation methods.
+
+# Installing and loading R packages
+
+```{r}
+pacman::p_load(tidyverse, sf, funModeling)
+```
+
+# Importing a geospatial data in shapefile format
+
+```{r}
+geoboundaries <-st_read(dsn = "Data/Geospatial", layer = "geoBoundaries-NGA-ADM2")
+```
+
+#Assigning EPSG code to a simple feature data frame
+
+```{r}
+st_crs(geoboundaries)
+```
+
+```{r}
+geoboundaries26391 <- st_set_crs(geoboundaries, 26391)
+```
+
+```{r}
+st_crs(geoboundaries26391)
+```
+
+#Importing the aspatial data
+
+```{r}
+waterpoint <-read_csv(("Data/Aspatial/Water_Point_Data_Exchange.csv"))
+```
+
+```{r}
+list(waterpoint)
+```
+
+```{r}
+waterpoint_sf <- st_as_sf(waterpoint, 
+                       coords = c("#lon_deg", "#lat_deg"),
+                       crs=4326) %>%
+  st_transform(crs = 26391)
+```
