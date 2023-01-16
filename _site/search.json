@@ -30,8 +30,15 @@
   {
     "objectID": "In-class_Ex/In-class_Ex/In-class_Ex02.html",
     "href": "In-class_Ex/In-class_Ex/In-class_Ex02.html",
-    "title": "In-class_Ex2",
+    "title": "In-class Exercise 2: Geospatial Data Wrangling",
     "section": "",
-    "text": "Hello, this is the In-class Ex 2."
+    "text": "Water is an important resource to mankind. Clean and accessible water is critical to human health. It provides a healthy environment, a sustainable economy, reduces poverty and ensures peace and security. Yet over 40% of the global population does not have access to sufficient clean water. By 2025, 1.8 billion people will be living in countries or regions with absolute water scarcity, according to UN-Water. The lack of water poses a major threat to several sectors, including food security. Agriculture uses about 70% of the world's accessible freshwater.\nDeveloping countries are most affected by water shortages and poor water quality. Up to 80% of illnesses in the developing world are linked to inadequate water and sanitation. Despite technological advancement, providing clean water to the rural community is still a major development issues in many countries globally, especially countries in the Africa continent.\nTo address the issue of providing clean and sustainable water supply to the rural community, a global Water Point Data Exchange (WPdx) project has been initiated. The main aim of this initiative is to collect water point related data from rural areas at the water point or small water scheme level and share the data via WPdx Data Repository, a cloud-based data library. What is so special of this project is that data are collected based on WPDx Data Standard."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex/In-class_Ex02.html#section",
+    "href": "In-class_Ex/In-class_Ex/In-class_Ex02.html#section",
+    "title": "In-class Exercise 2: Geospatial Data Wrangling",
+    "section": "",
+    "text": "The Data\n\nAspatial data\nFor the purpose of this assignment, data from WPdx Global Data Repositories will be used. There are two versions of the data. They are: WPdx-Basic and WPdx+. You are required to use WPdx+ data set.\n\n\nGeospatial data\nNigeria Level-2 Administrative Boundary (also known as Local Government Area) polygon features GIS data will be used in this take-home exercise. The data can be downloaded either from The Humanitarian Data Exchange portal or geoBoundaries."
   }
 ]
