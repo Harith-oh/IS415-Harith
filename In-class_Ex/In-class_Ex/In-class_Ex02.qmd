@@ -1,3 +1,5 @@
 ---
 title: "In-class_Ex2"
 ---
+
+Hello, this is the In-class Ex 2.
