@@ -20,7 +20,7 @@ To address the issue of providing clean and sustainable water supply to the rura
 
 Geospatial analytics hold tremendous potential to address complex problems facing society. In this study, you are tasked to apply appropriate geospatial data wrangling methods to prepare the data for water point mapping study. For the purpose of this study, Nigeria will be used as the study country.
 
-## 
+# 
 The Data
 
 ### **Aspatial data**
