@@ -1,0 +1,277 @@
+---
+title: "In-class Exercise 2: Geospatial Data Wrangling"
+date: "`r Sys.Date()`"
+format: html
+execute:
+  message: false
+  warning: false
+editor: visual
+---
+
+# 1. Background
+
+Water is an important resource to mankind. Clean and accessible water is critical to human health. It provides a healthy environment, a sustainable economy, reduces poverty and ensures peace and security. Yet over 40% of the global population does not have access to sufficient clean water. By 2025, 1.8 billion people will be living in countries or regions with absolute water scarcity, according to UN-Water. The lack of water poses a major threat to several sectors, including food security. Agriculture uses about 70% of the world's accessible freshwater.
+
+Developing countries are most affected by water shortages and poor water quality. Up to 80% of illnesses in the developing world are linked to inadequate water and sanitation. Despite technological advancement, providing clean water to the rural community is still a major development issues in many countries globally, especially countries in the Africa continent.
+
+To address the issue of providing clean and sustainable water supply to the rural community, a global [Water Point Data Exchange (WPdx)](https://www.waterpointdata.org/about/) project has been initiated. The main aim of this initiative is to collect water point related data from rural areas at the water point or small water scheme level and share the data via WPdx Data Repository, a cloud-based data library. What is so special of this project is that data are collected based on [WPDx Data Standard](https://www.waterpointdata.org/wp-content/uploads/2021/04/WPDx_Data_Standard.pdf).
+
+## 1.1 Objectives
+
+Geospatial analytics hold tremendous potential to address complex problems facing society. In this study, you are tasked to apply appropriate geospatial data wrangling methods to prepare the data for water point mapping study. For the purpose of this study, Nigeria will be used as the study country.
+
+## **Aspatial data**
+
+For the purpose of this assignment, data from [WPdx Global Data Repositories](https://www.waterpointdata.org/access-data/) will be used. There are two versions of the data. They are: WPdx-Basic and WPdx+. You are required to use WPdx+ data set.
+
+## **Geospatial data**
+
+Nigeria Level-2 Administrative Boundary (also known as Local Government Area) polygon features GIS data will be used in this take-home exercise. The data can be downloaded either from The [Humanitarian Data Exchange](https://data.humdata.org/) portal or [geoBoundaries](https://www.geoboundaries.org/).
+
+## 1.2 The Task
+
+The specific tasks of this take-home exercise are as follows:
+
+-   Using appropriate sf method, import the shapefile into R and save it in a simple feature data frame format. Note that there are three Projected Coordinate Systems of Nigeria, they are: EPSG: 26391, 26392, and 26303. You can use any one of them.
+
+-   Using appropriate tidyr and dplyr methods, derive the proportion of functional and non-functional water point at LGA level.
+
+-   Combining the geospatial and aspatial data frame into simple feature data frame.
+
+-   Visualising the distribution of water point by using appropriate analytical visualisation methods.
+
+# 2 Getting Started
+
+## 2.1 Installing and Loading Packages
+
+Firstly, the code below will check if pacman has been installed. If it has not been installed, R will download and install it, before activating it for use during this session.
+
+```{r}
+if (!require('pacman', character.only = T)){
+  install.packages('pacman')
+}
+library('pacman')
+```
+
+Next, pacman assists us by helping us load R packages that we require, sf, tidyverse and funModeling.
+
+```{r}
+pacman::p_load(sf, tidyverse, funModeling)
+```
+
+## 2.2 geoBoundaries Nigeria Level-2 Administrative Boundary Dataset
+
+### 2.2.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset
+
+In the code below, dsn specifies the filepath where the dataset is located and layer provides the filename of the dataset excluding the file extension.
+
+```{r}
+gbnigeria = st_read(dsn = "data/Geospatial", layer = "geoBoundaries-NGA-ADM2")
+```
+
+From the above message, it tells us that the dataset contains multipolygon features, containing 774 multipolygon features and 5 fields in the gbnigeria simple feature data frame and is in the WGS84 geographic coordinates system.
+
+Let us check the other dataset from Humanitarian data exchange.
+
+```{r}
+nigeria = st_read(dsn = "data/Geospatial", layer = "nga_admbnda_adm2_osgof_20190417")
+```
+
+From the above message, it tells us that the dataset contains multipolygon features, containing 774 multipolygon features and 16 fields in the gbnigeria simple feature data frame and is in the WGS84 geographic coordinates system.
+
+By comparing both datasets, the dataset from Humanitarian Data Exchange is more favourable as we can tell which state the LGA area belongs too which will be beneficial for our analysis
+
+### 2.2.2 Checking the Coordinate Reference System
+
+In the code below, we will check if the Coordinate Reference System has been specified correctly.
+
+```{r}
+st_crs(nigeria)
+```
+
+As seen above, the file has been configured correctly, having a WGS84 Geographic Coordinate System which maps to EPSG:4326.
+
+### 2.2.3 Converting the Coordinate Reference System
+
+In the code below, we will convert the Geographic Coordinate Reference System from WGS84 to EPSG:26391 Projected Coordinate System.
+
+```{r}
+nigeria26391 <- st_transform(nigeria, crs = 26391)
+```
+
+```{r}
+st_crs(nigeria26391)
+```
+
+After running the code, we can confirm that the data frame has been converted to EPSG:26391 Projected Coordinate System.
+
+## 2.3 WPdx + Aspatial Data
+
+### 2.3.1 Importing WPdx + Aspatial Data
+
+Since WPdx+ data set is in csv format, we will use read_csv() of readr package to import Water_Point_Data_Exchange\_-\_Plus**WPdx**.csv and output it to an R object called wpdx.
+
+```{r}
+wpdx <- read_csv("data/Aspatial/Water_Point_Data_Exchange.csv") %>%
+  filter(`#clean_country_name` == "Nigeria")
+```
+
+```{r}
+list(wpdx)
+```
+
+Our output shows our wpdx tibble data frame consists of 97,478 rows and 74 columns. The useful fields we would be paying attention to is the #lat_deg and #lon_deg columns, which are in the decimal degree format. By viewing the Data Standard on wpdx's website, we know that the latitude and longitude is in the wgs84 Geographic Coordinate System.
+
+### 2.3.2 Creating a Simple Feature Data Frame from an Aspatial Data Frame
+
+As the geometry is available in wkt in the column New Georeferenced Column, we can use st_as_sfc() to import the geomtry
+
+```{r}
+wpdx$Geometry <- st_as_sfc(wpdx$`New Georeferenced Column`)
+```
+
+As there is no spatial data information, firstly, we assign the original projection when converting the tibble dataframe to sf. The original is wgs84 which is EPSG:4326.
+
+```{r}
+wpdx_sf <- st_sf(wpdx, crs=4326)
+wpdx_sf
+```
+
+Next, we then convert the projection to the appropriate decimal based projection system.
+
+```{r}
+wpdx_sf <- wpdx_sf %>%
+  st_transform(crs = 26391)
+```
+
+# 3 Geospatial Data Cleaning
+
+## 3.1 Excluding Redundant Fields
+
+As the wpdx sf dataframe consist of many redundant field, we use select() to select the fields which we want to retain.
+
+```{r}
+nigeria26391 <- nigeria26391 %>%
+  select(c(3:4, 8:9))
+```
+
+## 3.2 Checking for Duplicate Name
+
+It is important to check for duplicate name in the data main data fields. Using duplicated(), we can flag out LGA names that might be duplicated as shown below:
+
+```{r}
+nigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]
+```
+
+To reduce duplication of LGA names, we will put the state names behind to make it more specific.
+
+```{r}
+nigeria26391$ADM2_EN[94] <- "Bassa, Kogi"
+nigeria26391$ADM2_EN[95] <- "Bassa, Plateau"
+nigeria26391$ADM2_EN[304] <- "Ifelodun, Kwara"
+nigeria26391$ADM2_EN[305] <- "Ifelodun, Osun"
+nigeria26391$ADM2_EN[355] <- "Irepodun, Kwara"
+nigeria26391$ADM2_EN[356] <- "Ireopodun, Osun"
+nigeria26391$ADM2_EN[519] <- "Nasarawa, Kano"
+nigeria26391$ADM2_EN[520] <- "Nasarawa, Nasarawa"
+nigeria26391$ADM2_EN[546] <- "Obi, Benue"
+nigeria26391$ADM2_EN[547] <- "Obi, Nasarawa"
+nigeria26391$ADM2_EN[693] <- "Surulere, Lagos"
+nigeria26391$ADM2_EN[694] <- "Surulere, Oyo"
+```
+
+Let us check now if the duplication has been resolved.
+
+```{r}
+nigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]
+```
+
+# 4 Data Wrangling for Water Point Data
+
+## 4.1 Understanding Field Names
+
+First, let us have a look at the #status_clean column which stores the information about Functional and Non-Functional data points. The code below returns all values that were used in the column.
+
+```{r}
+freq(data = wpdx_sf,
+     input = '#status_clean')
+```
+
+As there might be issues performing mathematical calculations with NA labels, we will rename them to unknown.
+
+The code below renames the column #status_clean to status_clean, select only the status_clean for manipulation and then replace all na values to unknown.
+
+```{r}
+wpdx_sf_nga <- wpdx_sf %>%
+  rename(status_clean = '#status_clean') %>%
+  select(status_clean) %>%
+  mutate(status_clean = replace_na(status_clean, "unknown"))
+```
+
+## 4.2 Filtering Data
+
+With our previous knowledge, we can filter the data to obtain functional proportion counts in each LGA level. We will filter the wpdx_sf_nga dataframes to option functional and non-functional water points.
+
+```{r}
+wpdx_func <- wpdx_sf_nga %>% 
+  filter(status_clean %in% 
+           c("Functional", 
+             "Functional but not in use", 
+             "Functional but needs repair"))
+wpdx_nonfunc <- wpdx_sf_nga %>% 
+  filter(status_clean %in%
+          c("Abadoned/Decommissioned", 
+            "Abandoned",
+            "Non-Functional due to dry season",
+            "Non-Functional",
+            "Non functional due to dry season"))
+wpdx_unknown <- wpdx_sf_nga %>%
+  filter(status_clean == "unknown")
+```
+
+## 4.3 Point-in-polygon Count
+
+Utilising st_intersects() of sf package and lengths, we check where each data point for the water point which fall inside each LGA. We do each calculation separation so we can cross check later to ensure all the values sum to the same total.
+
+```{r}
+nigeria_wp <- nigeria26391 %>%
+  mutate(`total_wp` = lengths(
+    st_intersects(nigeria26391, wpdx_sf_nga))) %>%
+  mutate(`wp_functional` = lengths(
+    st_intersects(nigeria26391, wpdx_func))) %>%
+  mutate(`wp_nonfunctional` = lengths(
+    st_intersects(nigeria26391, wpdx_nonfunc))) %>%
+  mutate(`wp_unknown` = lengths(
+    st_intersects(nigeria26391, wpdx_unknown)))
+```
+
+## 4.4 Saving the Analytical Data in rds format
+
+In order to retain the sf data structure for subsequent analysis, we should save the sf dataframe into rds format.
+
+```{r}
+write_rds(nigeria_wp, "Data/rds/nigeria_wp.rds")
+```
+
+## 4.5 Plotting the Distribution of Total Water Points by LGA in Histogram
+
+Next, we will use mutate() of dplyr package to compute the proportion of Functional and Non- water points.
+
+This is given by Functional Proportion = Functional Count / Total Count.
+
+```{r}
+ggplot(data = nigeria_wp,
+       aes(x = total_wp)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue") +
+  geom_vline(aes(xintercept = mean(
+    total_wp, na.rm = T)),
+    color = "red",
+    linetype = "dashed",
+    size = 0.8) +
+  ggtitle("Distribution of total water points by LGA") +
+  xlab("No. of water points") +
+  ylab("No of\nLGAs") +
+  theme(axis.title.y = element_text(angle = 0))
+```

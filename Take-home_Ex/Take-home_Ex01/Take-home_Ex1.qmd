@@ -1,0 +1,11 @@
+---
+title: "Take-home Exercise 1"
+author: "Harith Oh Yee Choon"
+date: "30 January 2023"
+date-modified: "`r Sys.Date()`"
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
