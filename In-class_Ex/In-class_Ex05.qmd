@@ -1,0 +1,75 @@
+---
+title: "In-class_Ex05"
+author: "Harith Oh Yee Choon"
+date: "6 February 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+## **Getting Started**
+
+```{r}
+pacman::p_load(tidyverse, tmap, sf, sfdep)
+```
+
+Importing data shapefile for study area
+
+```{r}
+studyArea <- st_read(dsn = "data/Geospatial", 
+                layer = "study_area") %>%
+  st_transform(crs = 3829)
+```
+
+
+Importing data shapefile for stores
+
+```{r}
+stores <- st_read(dsn = "data/Geospatial", 
+                layer = "stores") %>%
+  st_transform(crs = 3829)
+```
+
+## Visualizing the sf layers
+
+```{r}
+tmap_mode("view")
+tm_shape(studyArea) +
+  tm_polygons() +
+  tm_shape(stores) +
+  tm_dots(col = "Name", 
+          size = 0.01,
+          border.col = "black",
+          border.lwd = 0.5) +
+  tm_view(set.zoom.limits = c(12, 16))
+```
+
+## Local Colocation Quotients (LCLQ)
+
+```{r}
+nb <- include_self(
+  st_knn(st_geometry(stores),6)
+)
+
+wt <- st_kernel_weights(nb,
+                        stores,
+                        "gaussian",
+                        adaptive = TRUE)
+
+FamilyMart <- stores %>%
+  filter (Name == "Family Mart")
+
+SevenEleven <- stores %>%
+  filter (Name == "7-Eleven")
+B <- SevenEleven$Name
+
+LCLQ <- local_colocation (A,B,nb,wt,49)
+
+LCLQ_stores <- cbind(stores, LCLQ)
+
+
+

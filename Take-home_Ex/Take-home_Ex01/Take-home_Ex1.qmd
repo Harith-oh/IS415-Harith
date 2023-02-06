@@ -9,3 +9,112 @@ execute:
   warning: false
 editor: visual
 ---
+
+## 1 Introduction
+
+This study aims to analyse the geographical distribution of functional and non-function water points and their co-locations if any in Osun State, Nigeria by applying appropriate spatial point patterns analysis methods.
+
+-   To address the issue of providing a clean and sustainable water supply to the rural community, a global [Water Point Data Exchange (WPdx)](https://www.waterpointdata.org/about/) project has been initiated. The main aim of this initiative is to collect water point-related data from rural areas at the water point or small water scheme level and share the data via WPdx Data Repository, a cloud-based data library.
+
+## 2 Data
+
+The following data sets will be used in the analysis.
+
+Aspatial Data:
+
+For the purpose of this assignment, data from [WPdx Global Data Repositories](https://www.waterpointdata.org/access-data/) will be used. There are two versions of the data. They are: WPdx-Basic and WPdx+. You are required to use **WPdx+** data set.
+
+Geospatial Data:
+
+This study will focus of Osun State, Nigeria. The state boundary GIS data of Nigeria can be downloaded either from The [Humanitarian Data Exchange](https://data.humdata.org/) portal or [geoBoundaries](https://www.geoboundaries.org/).
+
++-----------------------------------------+------------+-------------+----------------------------------------------+
+| Data                                    | Format     | Description | Source                                       |
++=========================================+============+=============+==============================================+
+| Nigeria Level-2 Administrative Boundary | Shapefile  |             | Humanitarian Data Exchange(data.humdata.org) |
+|                                         |            |             |                                              |
+|                                         |            |             | or                                           |
+|                                         |            |             |                                              |
+|                                         |            |             | geoBoundaries (geoboundaries.org)            |
++-----------------------------------------+------------+-------------+----------------------------------------------+
+| WPdx Global Data Repositories (WPdx+)   | CSV        |             | waterpointdata.org                           |
++-----------------------------------------+------------+-------------+----------------------------------------------+
+
+## 3 Install and load packages
+
+```{r}
+pacman::p_load(tidyverse, funModeling, maptools, sf, raster, spatstat, tmap)
+```
+
+# 4 Import Data
+
+Importing & examining the contents of each data set.
+
+## 4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset
+
+```{r}
+gbnigeria = st_read(dsn = "data/Geospatial", layer = "geoBoundaries-NGA-ADM2")
+```
+
+```{r}
+nigeria = st_read(dsn = "data/Geospatial", layer = "nga_admbnda_adm2_osgof_20190417")
+
+```
+
+Check CRS
+
+```{r}
+st_crs(nigeria)
+```
+
+Converting to crs = 26391
+
+```{r}
+nigeria26391 <- st_transform(nigeria, crs = 26391)
+```
+
+```{r}
+st_crs(nigeria26391)
+```
+
+# 5 Data wrangling
+
+Pre-process and prepare data for analysis.
+
+## 5.1 Geospatial Data Cleaning
+
+As the wpdx sf dataframe consist of many redundant field, we use select() to select the fields which we want to retain.
+
+```{r}
+nigeria26391 <- nigeria26391 %>%
+   select(c(3:4, 8:9))
+```
+
+## 5.2 Checking for Duplicate Name
+
+```{r}
+nigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]
+```
+
+To reduce duplication of LGA names, we will put the state names behind to make it more specific.
+
+```{r}
+nigeria26391$ADM2_EN[94] <- "Bassa, Kogi"
+nigeria26391$ADM2_EN[95] <- "Bassa, Plateau"
+nigeria26391$ADM2_EN[304] <- "Ifelodun, Kwara"
+nigeria26391$ADM2_EN[305] <- "Ifelodun, Osun"
+nigeria26391$ADM2_EN[355] <- "Irepodun, Kwara"
+nigeria26391$ADM2_EN[356] <- "Ireopodun, Osun"
+nigeria26391$ADM2_EN[519] <- "Nasarawa, Kano"
+nigeria26391$ADM2_EN[520] <- "Nasarawa, Nasarawa"
+nigeria26391$ADM2_EN[546] <- "Obi, Benue"
+nigeria26391$ADM2_EN[547] <- "Obi, Nasarawa"
+nigeria26391$ADM2_EN[693] <- "Surulere, Lagos"
+nigeria26391$ADM2_EN[694] <- "Surulere, Oyo"
+```
+
+To check if the duplication has been resolved.
+
+```{r}
+nigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]
+```

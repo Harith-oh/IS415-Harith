@@ -242,7 +242,7 @@
     "href": "In-class_Ex/In-class_Ex04.html",
     "title": "In-class Exercise 4",
     "section": "",
-    "text": "pacman::p_load(maptools, sf, raster, spatstat, tmap)\n\nThings to learn from this code chunk.\nImporting spatial data\n\nchildcare_sf <- st_read(\"data/Geospatial/child-care-services-geojson.geojson\") %>% \n  st_transform(crs = 3414)\n\nReading layer `child-care-services-geojson' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial\\child-care-services-geojson.geojson' \n  using driver `GeoJSON'\nSimple feature collection with 1545 features and 2 fields\nGeometry type: POINT\nDimension:     XYZ\nBounding box:  xmin: 103.6824 ymin: 1.248403 xmax: 103.9897 ymax: 1.462134\nz_range:       zmin: 0 zmax: 0\nGeodetic CRS:  WGS 84\n\n\n\nsg_sf <- st_read(dsn = \"data/Geospatial\", layer=\"CostalOutline\")\n\nReading layer `CostalOutline' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 60 features and 4 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 2663.926 ymin: 16357.98 xmax: 56047.79 ymax: 50244.03\nProjected CRS: SVY21\n\n\n\nmpsz_sf <- st_read(dsn = \"data/Geospatial\", \n                layer = \"MP14_SUBZONE_WEB_PL\")\n\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n\n\n\ntmap_mode('view')\ntm_shape(childcare_sf)+\n  tm_dots()\n\n\n\n\n\n\n\ntmap_mode('plot')\n\n\nchildcare <- as_Spatial(childcare_sf)\nmpsz <- as_Spatial(mpsz_sf)\nsg <- as_Spatial(sg_sf)"
+    "text": "pacman::p_load(maptools, sf, raster, spatstat, tmap)\n\nThings to learn from this code chunk.\nImporting spatial data\n\nchildcare_sf <- st_read(\"data/Geospatial/child-care-services-geojson.geojson\") %>% \n  st_transform(crs = 3414)\n\nReading layer `child-care-services-geojson' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial\\child-care-services-geojson.geojson' \n  using driver `GeoJSON'\nSimple feature collection with 1545 features and 2 fields\nGeometry type: POINT\nDimension:     XYZ\nBounding box:  xmin: 103.6824 ymin: 1.248403 xmax: 103.9897 ymax: 1.462134\nz_range:       zmin: 0 zmax: 0\nGeodetic CRS:  WGS 84\n\n\n\nsg_sf <- st_read(dsn = \"data/Geospatial\", layer=\"CostalOutline\")\n\nReading layer `CostalOutline' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 60 features and 4 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 2663.926 ymin: 16357.98 xmax: 56047.79 ymax: 50244.03\nProjected CRS: SVY21\n\n\n\nmpsz_sf <- st_read(dsn = \"data/Geospatial\", \n                layer = \"MP14_SUBZONE_WEB_PL\")\n\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n\n\n\ntmap_mode('view')\ntm_shape(childcare_sf)+\n  tm_dots()\n\n\n\n\n\n\n\ntmap_mode('view')\ntm_shape(childcare_sf)+\n  tm_dots(alph =0.5,\n          size =0.01) +\n  tm_view(set.zoom.limits = c(11,14))\n\n\n\n\n\n\n\ntmap_mode('plot')\n\n\nchildcare <- as_Spatial(childcare_sf)\nmpsz <- as_Spatial(mpsz_sf)\nsg <- as_Spatial(sg_sf)"
   },
   {
     "objectID": "In-class_Ex/In-class_Ex04.html#converting-the-spatial-class-into-generic-sp-format",
@@ -257,5 +257,89 @@
     "title": "In-class Exercise 4",
     "section": "4.5.3 Converting the generic sp format into spatstat’s ppp format",
     "text": "4.5.3 Converting the generic sp format into spatstat’s ppp format\n\nchildcare_ppp <- as(childcare_sp, \"ppp\")\nchildcare_ppp\n\nPlanar point pattern: 1545 points\nwindow: rectangle = [11203.01, 45404.24] x [25667.6, 49300.88] units\n\n\n\nplot(childcare_ppp)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html",
+    "title": "Take-home Exercise 1",
+    "section": "",
+    "text": "This study aims to analyse the geographical distribution of functional and non-function water points and their co-locations if any in Osun State, Nigeria by applying appropriate spatial point patterns analysis methods.\n\nTo address the issue of providing a clean and sustainable water supply to the rural community, a global Water Point Data Exchange (WPdx) project has been initiated. The main aim of this initiative is to collect water point-related data from rural areas at the water point or small water scheme level and share the data via WPdx Data Repository, a cloud-based data library."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#data",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#data",
+    "title": "Take-home Exercise 1",
+    "section": "2 Data",
+    "text": "2 Data\nThe following data sets will be used in the analysis.\nAspatial Data:\nFor the purpose of this assignment, data from WPdx Global Data Repositories will be used. There are two versions of the data. They are: WPdx-Basic and WPdx+. You are required to use WPdx+ data set.\nGeospatial Data:\nThis study will focus of Osun State, Nigeria. The state boundary GIS data of Nigeria can be downloaded either from The Humanitarian Data Exchange portal or geoBoundaries.\n\n\n\n\n\n\n\n\n\nData\nFormat\nDescription\nSource\n\n\n\n\nNigeria Level-2 Administrative Boundary\nShapefile\n\nHumanitarian Data Exchange(data.humdata.org)\nor\ngeoBoundaries (geoboundaries.org)\n\n\nWPdx Global Data Repositories (WPdx+)\nCSV\n\nwaterpointdata.org"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#install-and-load-packages",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#install-and-load-packages",
+    "title": "Take-home Exercise 1",
+    "section": "3 Install and load packages",
+    "text": "3 Install and load packages\n\npacman::p_load(tidyverse, funModeling, maptools, sf, raster, spatstat, tmap)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#import-data",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#import-data",
+    "title": "Take-home Exercise 1",
+    "section": "4 Import Data",
+    "text": "4 Import Data\nImporting & examining the contents of each data set."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#data-wrangling",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#data-wrangling",
+    "title": "Take-home Exercise 1",
+    "section": "5 Data wrangling",
+    "text": "5 Data wrangling\nPre-process and prepare data for analysis."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#importing-geoboundaries-nigeria-level-2-administrative-boundary-dataset",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#importing-geoboundaries-nigeria-level-2-administrative-boundary-dataset",
+    "title": "Take-home Exercise 1",
+    "section": "4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset",
+    "text": "4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset\n\ngbnigeria = st_read(dsn = \"data/Geospatial\", layer = \"geoBoundaries-NGA-ADM2\")\n\nReading layer `geoBoundaries-NGA-ADM2' from data source \n  `C:\\Harith-oh\\IS415-Harith\\Take-home_Ex\\Take-home_Ex01\\data\\Geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 5 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\n\nnigeria = st_read(dsn = \"data/Geospatial\", layer = \"nga_admbnda_adm2_osgof_20190417\")\n\nReading layer `nga_admbnda_adm2_osgof_20190417' from data source \n  `C:\\Harith-oh\\IS415-Harith\\Take-home_Ex\\Take-home_Ex01\\data\\Geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 16 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\nCheck CRS\n\nst_crs(nigeria)\n\nCoordinate Reference System:\n  User input: WGS 84 \n  wkt:\nGEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"latitude\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"longitude\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]\n\n\nConverting to crs = 26391\n\nnigeria26391 <- st_transform(nigeria, crs = 26391)\n\n\nst_crs(nigeria26391)\n\nCoordinate Reference System:\n  User input: EPSG:26391 \n  wkt:\nPROJCRS[\"Minna / Nigeria West Belt\",\n    BASEGEOGCRS[\"Minna\",\n        DATUM[\"Minna\",\n            ELLIPSOID[\"Clarke 1880 (RGS)\",6378249.145,293.465,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4263]],\n    CONVERSION[\"Nigeria West Belt\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",4,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",4.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.99975,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",230738.26,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Engineering survey, topographic mapping.\"],\n        AREA[\"Nigeria - onshore west of 6°30'E, onshore and offshore shelf.\"],\n        BBOX[3.57,2.69,13.9,6.5]],\n    ID[\"EPSG\",26391]]"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#checking-for-duplicate-name",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#checking-for-duplicate-name",
+    "title": "Take-home Exercise 1",
+    "section": "5.2 Checking for Duplicate Name",
+    "text": "5.2 Checking for Duplicate Name\n\nnigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]\n\n[1] \"Bassa\"    \"Ifelodun\" \"Irepodun\" \"Nasarawa\" \"Obi\"      \"Surulere\"\n\n\nTo reduce duplication of LGA names, we will put the state names behind to make it more specific.\n\nnigeria26391$ADM2_EN[94] <- \"Bassa, Kogi\"\nnigeria26391$ADM2_EN[95] <- \"Bassa, Plateau\"\nnigeria26391$ADM2_EN[304] <- \"Ifelodun, Kwara\"\nnigeria26391$ADM2_EN[305] <- \"Ifelodun, Osun\"\nnigeria26391$ADM2_EN[355] <- \"Irepodun, Kwara\"\nnigeria26391$ADM2_EN[356] <- \"Ireopodun, Osun\"\nnigeria26391$ADM2_EN[519] <- \"Nasarawa, Kano\"\nnigeria26391$ADM2_EN[520] <- \"Nasarawa, Nasarawa\"\nnigeria26391$ADM2_EN[546] <- \"Obi, Benue\"\nnigeria26391$ADM2_EN[547] <- \"Obi, Nasarawa\"\nnigeria26391$ADM2_EN[693] <- \"Surulere, Lagos\"\nnigeria26391$ADM2_EN[694] <- \"Surulere, Oyo\"\n\nTo check if the duplication has been resolved.\n\nnigeria26391$ADM2_EN[duplicated(nigeria26391$ADM2_EN) == TRUE]\n\ncharacter(0)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#geospatial-data-cleaning",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#geospatial-data-cleaning",
+    "title": "Take-home Exercise 1",
+    "section": "5.1 Geospatial Data Cleaning",
+    "text": "5.1 Geospatial Data Cleaning\nAs the wpdx sf dataframe consist of many redundant field, we use select() to select the fields which we want to retain."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html",
+    "href": "In-class_Ex/In-class_Ex05.html",
+    "title": "In-class_Ex05",
+    "section": "",
+    "text": "pacman::p_load(tidyverse, tmap, sf, sfdep)\n\nImporting data shapefile for study area\n\nstudyArea <- st_read(dsn = \"data/Geospatial\", \n                layer = \"study_area\") %>%\n  st_transform(crs = 3829)\n\nReading layer `study_area' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 7 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 121.4836 ymin: 25.00776 xmax: 121.592 ymax: 25.09288\nGeodetic CRS:  TWD97\n\n\nImporting data shapefile for stores\n\nstores <- st_read(dsn = \"data/Geospatial\", \n                layer = \"stores\") %>%\n  st_transform(crs = 3829)\n\nReading layer `stores' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 1409 features and 4 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 121.4902 ymin: 25.01257 xmax: 121.5874 ymax: 25.08557\nGeodetic CRS:  TWD97"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#importing-data",
+    "href": "In-class_Ex/In-class_Ex05.html#importing-data",
+    "title": "In-class_Ex05",
+    "section": "Importing Data",
+    "text": "Importing Data\n\nstudyArea <- st_read(dsn = \"data/Geospatial\", \n                layer = \"stores\") %>%\n  st_transform(crs = 3829)\n\nReading layer `stores' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 1409 features and 4 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 121.4902 ymin: 25.01257 xmax: 121.5874 ymax: 25.08557\nGeodetic CRS:  TWD97"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#visualizing-the-sf-layers",
+    "href": "In-class_Ex/In-class_Ex05.html#visualizing-the-sf-layers",
+    "title": "In-class_Ex05",
+    "section": "Visualizing the sf layers",
+    "text": "Visualizing the sf layers\n\ntmap_mode(\"view\")\ntm_shape(studyArea) +\n  tm_polygons() +\n  tm_shape(stores) +\n  tm_dots(col = \"Name\", \n          size = 0.01,\n          border.col = \"black\",\n          border.lwd = 0.5) +\n  tm_view(set.zoom.limits = c(12, 16))"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#local-colocation-quotients-lclq",
+    "href": "In-class_Ex/In-class_Ex05.html#local-colocation-quotients-lclq",
+    "title": "In-class_Ex05",
+    "section": "Local Colocation Quotients (LCLQ)",
+    "text": "Local Colocation Quotients (LCLQ)\nnb <- include_self( st_knn(st_geometry(stores),6) )\nwt <- st_kernel_weights(nb, stores, “gaussian”, adaptive = TRUE)\nFamilyMart <- stores %>% filter (Name == “Family Mart”)\nSevenEleven <- stores %>% filter (Name == “7-Eleven”) B <- SevenEleven$Name\nLCLQ <- local_colocation (A,B,nb,wt,49)\nLCLQ_stores <- cbind(stores, LCLQ)"
   }
 ]
