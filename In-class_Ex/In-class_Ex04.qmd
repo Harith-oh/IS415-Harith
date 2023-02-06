@@ -41,6 +41,14 @@ tm_shape(childcare_sf)+
 ```
 
 ```{r}
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots(alph =0.5,
+          size =0.01) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+```{r}
 tmap_mode('plot')
 ```
 
@@ -50,14 +58,14 @@ mpsz <- as_Spatial(mpsz_sf)
 sg <- as_Spatial(sg_sf)
 ```
 
-## 4.5.2 Converting the Spatial* class into generic sp format
+## 4.5.2 Converting the Spatial\* class into generic sp format
 
 ```{r}
 childcare_sp <- as(childcare, "SpatialPoints")
 sg_sp <- as(sg, "SpatialPolygons")
 ```
 
-## 4.5.3 Converting the generic sp format into spatstat’s ppp format
+## 4.5.3 Converting the generic sp format into spatstat's ppp format
 
 ```{r}
 childcare_ppp <- as(childcare_sp, "ppp")
