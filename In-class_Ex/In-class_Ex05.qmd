@@ -34,7 +34,7 @@ stores <- st_read(dsn = "data/Geospatial",
   st_transform(crs = 3829)
 ```
 
-## Visualizing the sf layers
+## Visualizing the sf layer
 
 ```{r}
 tmap_mode("view")

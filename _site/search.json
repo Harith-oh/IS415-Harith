@@ -341,5 +341,12 @@
     "title": "In-class_Ex05",
     "section": "Local Colocation Quotients (LCLQ)",
     "text": "Local Colocation Quotients (LCLQ)\nnb <- include_self( st_knn(st_geometry(stores),6) )\nwt <- st_kernel_weights(nb, stores, “gaussian”, adaptive = TRUE)\nFamilyMart <- stores %>% filter (Name == “Family Mart”)\nSevenEleven <- stores %>% filter (Name == “7-Eleven”) B <- SevenEleven$Name\nLCLQ <- local_colocation (A,B,nb,wt,49)\nLCLQ_stores <- cbind(stores, LCLQ)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#visualizing-the-sf-layer",
+    "href": "In-class_Ex/In-class_Ex05.html#visualizing-the-sf-layer",
+    "title": "In-class_Ex05",
+    "section": "Visualizing the sf layer",
+    "text": "Visualizing the sf layer\n\ntmap_mode(\"view\")\ntm_shape(studyArea) +\n  tm_polygons() +\n  tm_shape(stores) +\n  tm_dots(col = \"Name\", \n          size = 0.01,\n          border.col = \"black\",\n          border.lwd = 0.5) +\n  tm_view(set.zoom.limits = c(12, 16))"
   }
 ]
