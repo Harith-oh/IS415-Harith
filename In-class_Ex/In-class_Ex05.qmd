@@ -25,7 +25,6 @@ studyArea <- st_read(dsn = "data/Geospatial",
   st_transform(crs = 3829)
 ```
 
-
 Importing data shapefile for stores
 
 ```{r}
@@ -52,24 +51,45 @@ tm_shape(studyArea) +
 
 ```{r}
 nb <- include_self(
-  st_knn(st_geometry(stores),6)
-)
+  st_knn(st_geometry(stores), 6))
+```
 
+
+```{r}
 wt <- st_kernel_weights(nb,
-                        stores,
+                        stores, 
                         "gaussian",
                         adaptive = TRUE)
+```
 
+```{r}
 FamilyMart <- stores %>%
-  filter (Name == "Family Mart")
+  filter(Name == "Family Mart")
+A <- FamilyMart$Name
+```
 
+```{r}
 SevenEleven <- stores %>%
-  filter (Name == "7-Eleven")
+  filter(Name == "7-Eleven")
 B <- SevenEleven$Name
+```
 
-LCLQ <- local_colocation (A,B,nb,wt,49)
+```{r}
+LCLQ <- local_colocation(A, B, nb, wt , 49)
+```
 
+```{r}
 LCLQ_stores <- cbind(stores, LCLQ)
+```
 
-
-
+```{r}
+tmap_mode("view")
+tm_shape(studyArea) +
+  tm_polygons() +
+  tm_shape(LCLQ_stores) +
+  tm_dots(col = "X7.Eleven", 
+          size = 0.01,
+          border.col = "black",
+          border.lwd = 0.5) +
+  tm_view(set.zoom.limits = c(12, 16))
+```

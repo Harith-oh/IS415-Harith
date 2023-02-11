@@ -277,7 +277,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#install-and-load-packages",
     "title": "Take-home Exercise 1",
     "section": "3 Install and load packages",
-    "text": "3 Install and load packages\n\npacman::p_load(tidyverse, funModeling, maptools, sf, raster, spatstat, tmap)"
+    "text": "3 Install and load packages\nFirstly, the code below will check if pacman has been installed. If it has not been installed, R will download and install it, before activating it for use during this session.\n\nif (!require('pacman', character.only = T)){\n  install.packages('pacman')\n}\nlibrary('pacman')\n\nTo get started, the following packages will be used for this exercise:\ntidyverse, funModeling, maptools, sf, raster, spatstat & tmap.\n\npacman::p_load(maptools, sf, tidyverse, raster, spatstat, tmap, sfdep, funModeling)"
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#import-data",
@@ -298,7 +298,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#importing-geoboundaries-nigeria-level-2-administrative-boundary-dataset",
     "title": "Take-home Exercise 1",
     "section": "4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset",
-    "text": "4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset\n\ngbnigeria = st_read(dsn = \"data/Geospatial\", layer = \"geoBoundaries-NGA-ADM2\")\n\nReading layer `geoBoundaries-NGA-ADM2' from data source \n  `C:\\Harith-oh\\IS415-Harith\\Take-home_Ex\\Take-home_Ex01\\data\\Geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 5 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\n\nnigeria = st_read(dsn = \"data/Geospatial\", layer = \"nga_admbnda_adm2_osgof_20190417\")\n\nReading layer `nga_admbnda_adm2_osgof_20190417' from data source \n  `C:\\Harith-oh\\IS415-Harith\\Take-home_Ex\\Take-home_Ex01\\data\\Geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 16 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\nCheck CRS\n\nst_crs(nigeria)\n\nCoordinate Reference System:\n  User input: WGS 84 \n  wkt:\nGEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"latitude\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"longitude\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]\n\n\nConverting to crs = 26391\n\nnigeria26391 <- st_transform(nigeria, crs = 26391)\n\n\nst_crs(nigeria26391)\n\nCoordinate Reference System:\n  User input: EPSG:26391 \n  wkt:\nPROJCRS[\"Minna / Nigeria West Belt\",\n    BASEGEOGCRS[\"Minna\",\n        DATUM[\"Minna\",\n            ELLIPSOID[\"Clarke 1880 (RGS)\",6378249.145,293.465,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4263]],\n    CONVERSION[\"Nigeria West Belt\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",4,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",4.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.99975,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",230738.26,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Engineering survey, topographic mapping.\"],\n        AREA[\"Nigeria - onshore west of 6°30'E, onshore and offshore shelf.\"],\n        BBOX[3.57,2.69,13.9,6.5]],\n    ID[\"EPSG\",26391]]"
+    "text": "4.1 Importing geoBoundaries Nigeria Level-2 Administrative Boundary Dataset\n\nnigeria = st_read(dsn = \"data/Geospatial\", layer = \"nga_admbnda_adm2_osgof_20190417\")\n\nReading layer `nga_admbnda_adm2_osgof_20190417' from data source \n  `C:\\Harith-oh\\IS415-Harith\\Take-home_Ex\\Take-home_Ex01\\data\\Geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 16 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84\n\n\nCheck CRS\n\nst_crs(nigeria)\n\nCoordinate Reference System:\n  User input: WGS 84 \n  wkt:\nGEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"latitude\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"longitude\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#checking-for-duplicate-name",
@@ -312,7 +312,7 @@
     "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#geospatial-data-cleaning",
     "title": "Take-home Exercise 1",
     "section": "5.1 Geospatial Data Cleaning",
-    "text": "5.1 Geospatial Data Cleaning\nAs the wpdx sf dataframe consist of many redundant field, we use select() to select the fields which we want to retain."
+    "text": "5.1 Geospatial Data Cleaning\nAs the wpdx sf dataframe consist of many redundant field, we use select() to select the fields which we want to retain.\n\nnigeria26391 <- nigeria26391 %>%\n  dplyr::select(c(3:4, 8:9))"
   },
   {
     "objectID": "In-class_Ex/In-class_Ex05.html",
@@ -340,7 +340,7 @@
     "href": "In-class_Ex/In-class_Ex05.html#local-colocation-quotients-lclq",
     "title": "In-class_Ex05",
     "section": "Local Colocation Quotients (LCLQ)",
-    "text": "Local Colocation Quotients (LCLQ)\nnb <- include_self( st_knn(st_geometry(stores),6) )\nwt <- st_kernel_weights(nb, stores, “gaussian”, adaptive = TRUE)\nFamilyMart <- stores %>% filter (Name == “Family Mart”)\nSevenEleven <- stores %>% filter (Name == “7-Eleven”) B <- SevenEleven$Name\nLCLQ <- local_colocation (A,B,nb,wt,49)\nLCLQ_stores <- cbind(stores, LCLQ)"
+    "text": "Local Colocation Quotients (LCLQ)\n\nnb <- include_self(\n  st_knn(st_geometry(stores), 6))\n\n\nwt <- st_kernel_weights(nb,\n                        stores, \n                        \"gaussian\",\n                        adaptive = TRUE)\n\n\nFamilyMart <- stores %>%\n  filter(Name == \"Family Mart\")\nA <- FamilyMart$Name\n\n\nSevenEleven <- stores %>%\n  filter(Name == \"7-Eleven\")\nB <- SevenEleven$Name\n\n\nLCLQ <- local_colocation(A, B, nb, wt , 49)\n\n\nLCLQ_stores <- cbind(stores, LCLQ)\n\n\ntmap_mode(\"view\")\ntm_shape(studyArea) +\n  tm_polygons() +\n  tm_shape(LCLQ_stores) +\n  tm_dots(col = \"X7.Eleven\", \n          size = 0.01,\n          border.col = \"black\",\n          border.lwd = 0.5) +\n  tm_view(set.zoom.limits = c(12, 16))"
   },
   {
     "objectID": "In-class_Ex/In-class_Ex05.html#visualizing-the-sf-layer",
@@ -348,5 +348,159 @@
     "title": "In-class_Ex05",
     "section": "Visualizing the sf layer",
     "text": "Visualizing the sf layer\n\ntmap_mode(\"view\")\ntm_shape(studyArea) +\n  tm_polygons() +\n  tm_shape(stores) +\n  tm_dots(col = \"Name\", \n          size = 0.01,\n          border.col = \"black\",\n          border.lwd = 0.5) +\n  tm_view(set.zoom.limits = c(12, 16))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#converting-the-coordinating-reference-system",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#converting-the-coordinating-reference-system",
+    "title": "Take-home Exercise 1",
+    "section": "4.2 Converting the Coordinating Reference System",
+    "text": "4.2 Converting the Coordinating Reference System\nIn the code below, we will convert the Geographic Coordinate Reference System from WGS84 to EPSG:26391 Projected Coordinate System.\n\nnigeria26391 <- st_transform(nigeria, crs = 26391)\n\n\nst_crs(nigeria26391)\n\nCoordinate Reference System:\n  User input: EPSG:26391 \n  wkt:\nPROJCRS[\"Minna / Nigeria West Belt\",\n    BASEGEOGCRS[\"Minna\",\n        DATUM[\"Minna\",\n            ELLIPSOID[\"Clarke 1880 (RGS)\",6378249.145,293.465,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4263]],\n    CONVERSION[\"Nigeria West Belt\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",4,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",4.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.99975,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",230738.26,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Engineering survey, topographic mapping.\"],\n        AREA[\"Nigeria - onshore west of 6°30'E, onshore and offshore shelf.\"],\n        BBOX[3.57,2.69,13.9,6.5]],\n    ID[\"EPSG\",26391]]\n\n\nAfter running the code, we can confirm that the data frame has been converted to EPSG:26391 Projected Coordinate System."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#importing-wpdx-aspatial-data",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#importing-wpdx-aspatial-data",
+    "title": "Take-home Exercise 1",
+    "section": "4.3 Importing WPdx + Aspatial Data",
+    "text": "4.3 Importing WPdx + Aspatial Data\nSince WPdx+ data set is in csv format, we will use read_csv() of readr package to import Water_Point_Data_Exchange_-_PlusWPdx.csv and output it to an R object called wpdx.\n\nwpdx <- read_csv(\"data/Aspatial/Water_Point_Data_Exchange.csv\") %>%\n  filter(`#clean_country_name` == \"Nigeria\")\n\n\nlist(wpdx)\n\n[[1]]\n# A tibble: 95,008 × 70\n   row_id `#source`      #lat_…¹ #lon_…² #repo…³ #stat…⁴ #wate…⁵ #wate…⁶ #wate…⁷\n    <dbl> <chr>            <dbl>   <dbl> <chr>   <chr>   <chr>   <chr>   <chr>  \n 1 429068 GRID3             7.98    5.12 08/29/… Unknown <NA>    <NA>    Tapsta…\n 2 222071 Federal Minis…    6.96    3.60 08/16/… Yes     Boreho… Well    Mechan…\n 3 160612 WaterAid          6.49    7.93 12/04/… Yes     Boreho… Well    Hand P…\n 4 160669 WaterAid          6.73    7.65 12/04/… Yes     Boreho… Well    <NA>   \n 5 160642 WaterAid          6.78    7.66 12/04/… Yes     Boreho… Well    Hand P…\n 6 160628 WaterAid          6.96    7.78 12/04/… Yes     Boreho… Well    Hand P…\n 7 160632 WaterAid          7.02    7.84 12/04/… Yes     Boreho… Well    Hand P…\n 8 642747 Living Water …    7.33    8.98 10/03/… Yes     Boreho… Well    Mechan…\n 9 642456 Living Water …    7.17    9.11 10/03/… Yes     Boreho… Well    Hand P…\n10 641347 Living Water …    7.20    9.22 03/28/… Yes     Boreho… Well    Hand P…\n# … with 94,998 more rows, 61 more variables: `#water_tech_category` <chr>,\n#   `#facility_type` <chr>, `#clean_country_name` <chr>, `#clean_adm1` <chr>,\n#   `#clean_adm2` <chr>, `#clean_adm3` <chr>, `#clean_adm4` <chr>,\n#   `#install_year` <dbl>, `#installer` <chr>, `#rehab_year` <lgl>,\n#   `#rehabilitator` <lgl>, `#management_clean` <chr>, `#status_clean` <chr>,\n#   `#pay` <chr>, `#fecal_coliform_presence` <chr>,\n#   `#fecal_coliform_value` <dbl>, `#subjective_quality` <chr>, …\n\n\nOur output shows our wpdx tibble data frame consists of 97,478 rows and 74 columns. The useful fields we would be paying attention to is the #lat_deg and #lon_deg columns, which are in the decimal degree format. By viewing the Data Standard on wpdx’s website, we know that the latitude and longitude is in the wgs84 Geographic Coordinate System.\n\n4.3.1 Creating a simple data frame from an Aspatial Data Frame\nAs the geometry is available in wkt in the column New Georeferenced Column, we can use st_as_sfc() to import the geomtry\n\nwpdx$Geometry <- st_as_sfc(wpdx$`New Georeferenced Column`)\n\nAs there is no spatial data information, firstly, we assign the original projection when converting the tibble dataframe to sf. The original is wgs84 which is EPSG:4326.\n\nwpdx_sf <- st_sf(wpdx, crs=4326)\nwpdx_sf\n\nSimple feature collection with 95008 features and 70 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 2.707441 ymin: 4.301812 xmax: 14.21828 ymax: 13.86568\nGeodetic CRS:  WGS 84\n# A tibble: 95,008 × 71\n   row_id `#source`      #lat_…¹ #lon_…² #repo…³ #stat…⁴ #wate…⁵ #wate…⁶ #wate…⁷\n *  <dbl> <chr>            <dbl>   <dbl> <chr>   <chr>   <chr>   <chr>   <chr>  \n 1 429068 GRID3             7.98    5.12 08/29/… Unknown <NA>    <NA>    Tapsta…\n 2 222071 Federal Minis…    6.96    3.60 08/16/… Yes     Boreho… Well    Mechan…\n 3 160612 WaterAid          6.49    7.93 12/04/… Yes     Boreho… Well    Hand P…\n 4 160669 WaterAid          6.73    7.65 12/04/… Yes     Boreho… Well    <NA>   \n 5 160642 WaterAid          6.78    7.66 12/04/… Yes     Boreho… Well    Hand P…\n 6 160628 WaterAid          6.96    7.78 12/04/… Yes     Boreho… Well    Hand P…\n 7 160632 WaterAid          7.02    7.84 12/04/… Yes     Boreho… Well    Hand P…\n 8 642747 Living Water …    7.33    8.98 10/03/… Yes     Boreho… Well    Mechan…\n 9 642456 Living Water …    7.17    9.11 10/03/… Yes     Boreho… Well    Hand P…\n10 641347 Living Water …    7.20    9.22 03/28/… Yes     Boreho… Well    Hand P…\n# … with 94,998 more rows, 62 more variables: `#water_tech_category` <chr>,\n#   `#facility_type` <chr>, `#clean_country_name` <chr>, `#clean_adm1` <chr>,\n#   `#clean_adm2` <chr>, `#clean_adm3` <chr>, `#clean_adm4` <chr>,\n#   `#install_year` <dbl>, `#installer` <chr>, `#rehab_year` <lgl>,\n#   `#rehabilitator` <lgl>, `#management_clean` <chr>, `#status_clean` <chr>,\n#   `#pay` <chr>, `#fecal_coliform_presence` <chr>,\n#   `#fecal_coliform_value` <dbl>, `#subjective_quality` <chr>, …\n\n\nNext, we then convert the projection to the appropriate decimal based projection system.\n\nwpdx_sf <- wpdx_sf %>%\n  st_transform(crs = 26391)\n\n\nwpdx_spdf <- as_Spatial(wpdx_sf)\nwpdx_spdf\n\nclass       : SpatialPointsDataFrame \nfeatures    : 95008 \nextent      : 32536.82, 1292096, 33461.24, 1091052  (xmin, xmax, ymin, ymax)\ncrs         : +proj=tmerc +lat_0=4 +lon_0=4.5 +k=0.99975 +x_0=230738.26 +y_0=0 +a=6378249.145 +rf=293.465 +towgs84=-92,-93,122,0,0,0,0 +units=m +no_defs \nvariables   : 70\nnames       : row_id,                                     X.source, X.lat_deg,  X.lon_deg,          X.report_date, X.status_id, X.water_source_clean, X.water_source_category, X.water_tech_clean, X.water_tech_category, X.facility_type, X.clean_country_name, X.clean_adm1, X.clean_adm2, X.clean_adm3, ... \nmin values  :  10732, Federal Ministry of Water Resources, Nigeria, 4.3018117,   2.707441, 01/01/2010 12:00:00 AM,          No,             Borehole,             Piped Water,          Hand Pump,             Hand Pump,        Improved,              Nigeria,         Abia,    Aba North,           NA, ... \nmax values  : 681838,                                  WaterAid UK, 13.865675, 14.2182849, 12/31/2014 12:00:00 AM,         Yes,       Protected Well,                    Well,           Tapstand,              Tapstand,        Improved,              Nigeria,      Zamfara,         Zuru,           NA, ..."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#understanding-field-names",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#understanding-field-names",
+    "title": "Take-home Exercise 1",
+    "section": "6.1 Understanding Field Names",
+    "text": "6.1 Understanding Field Names\nFirst, let us have a look at the #status_clean column which stores the information about Functional and Non-Functional data points. The code below returns all values that were used in the column.\n\nfreq(data = wpdx_sf,\n     input = '#status_clean')\n\n\n\n\n                     #status_clean frequency percentage cumulative_perc\n1                       Functional     45883      48.29           48.29\n2                   Non-Functional     29385      30.93           79.22\n3                             <NA>     10656      11.22           90.44\n4      Functional but needs repair      4579       4.82           95.26\n5 Non-Functional due to dry season      2403       2.53           97.79\n6        Functional but not in use      1686       1.77           99.56\n7         Abandoned/Decommissioned       234       0.25           99.81\n8                        Abandoned       175       0.18           99.99\n9 Non functional due to dry season         7       0.01          100.00\n\n\nAs there might be issues performing mathematical calculations with NA labels, we will rename them to unknown.\nThe code below renames the column #status_clean to status_clean, select only the status_clean for manipulation and then replace all na values to unknown.\n\nwpdx_sf_nga <- wpdx_sf %>%\n  rename(status_clean = '#status_clean') %>%\n  dplyr::select(status_clean) %>%\n  mutate(status_clean = replace_na(status_clean, \"unknown\"))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#filtering-data",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#filtering-data",
+    "title": "Take-home Exercise 1",
+    "section": "6.2 Filtering Data",
+    "text": "6.2 Filtering Data\nWith our previous knowledge, we can filter the data to obtain functional proportion counts in each LGA level. We will filter the wpdx_sf_nga dataframes to option functional and non-functional water points.\n\nwpdx_func <- wpdx_sf_nga %>% \n  filter(status_clean %in% \n           c(\"Functional\", \n             \"Functional but not in use\", \n             \"Functional but needs repair\"))\nwpdx_nonfunc <- wpdx_sf_nga %>% \n  filter(status_clean %in%\n          c(\"Abandoned/Decommissioned\", \n            \"Abandoned\",\n            \"Non-Functional due to dry season\",\n            \"Non-Functional\",\n            \"Non functional due to dry season\"))\nwpdx_unknown <- wpdx_sf_nga %>%\n  filter(status_clean == \"unknown\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#point-in-polygon-count",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#point-in-polygon-count",
+    "title": "Take-home Exercise 1",
+    "section": "6.3 Point-in-polygon Count",
+    "text": "6.3 Point-in-polygon Count\nUtilising st_intersects() of sf package and lengths, we check where each data point for the water point which fall inside each LGA. We do each calculation separation so we can cross check later to ensure all the values sum to the same total.\n\nnigeria_wp <- nigeria26391 %>%\n  mutate(`total_wp` = lengths(\n    st_intersects(nigeria26391, wpdx_sf_nga))) %>%\n  mutate(`wp_functional` = lengths(\n    st_intersects(nigeria26391, wpdx_func))) %>%\n  mutate(`wp_nonfunctional` = lengths(\n    st_intersects(nigeria26391, wpdx_nonfunc))) %>%\n  mutate(`wp_unknown` = lengths(\n    st_intersects(nigeria26391, wpdx_unknown)))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#saving-the-analytical-data-in-rds-format",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#saving-the-analytical-data-in-rds-format",
+    "title": "Take-home Exercise 1",
+    "section": "6.4 Saving the Analytical Data in rds format",
+    "text": "6.4 Saving the Analytical Data in rds format\nIn order to retain the sf data structure for subsequent analysis, we should save the sf dataframe into rds format.\n\nwrite_rds(nigeria_wp, \"Data/rds/nigeria_wp.rds\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#plotting-the-distribution-of-total-water-points-by-lga-in-histogram",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#plotting-the-distribution-of-total-water-points-by-lga-in-histogram",
+    "title": "Take-home Exercise 1",
+    "section": "6.5 Plotting the Distribution of Total Water Points by LGA in Histogram",
+    "text": "6.5 Plotting the Distribution of Total Water Points by LGA in Histogram\nNext, we will use mutate() of dplyr package to compute the proportion of Functional and Non- water points.\nThis is given by Functional Proportion = Functional Count / Total Count.\n\nggplot(data = nigeria_wp,\n       aes(x = total_wp)) +\n  geom_histogram(bins = 20,\n                 color = \"black\",\n                 fill = \"light blue\") +\n  geom_vline(aes(xintercept = mean(\n    total_wp, na.rm = T)),\n    color = \"red\",\n    linetype = \"dashed\",\n    size = 0.8) +\n  ggtitle(\"Distribution of total water points by LGA\") +\n  xlab(\"No. of water points\") +\n  ylab(\"No of\\nLGAs\") +\n  theme(axis.title.y = element_text(angle = 0))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#exploratory-spatial-data-analysis-esda",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#exploratory-spatial-data-analysis-esda",
+    "title": "Take-home Exercise 1",
+    "section": "7 Exploratory Spatial Data Analysis (ESDA)",
+    "text": "7 Exploratory Spatial Data Analysis (ESDA)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#import-the-data-saved-in-rds",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#import-the-data-saved-in-rds",
+    "title": "Take-home Exercise 1",
+    "section": "7.1 Import the data saved in rds",
+    "text": "7.1 Import the data saved in rds\nWe want to import the sf dataframe we have cleaned and prepared earlier\n\nNGA_wp <- read_rds(\"Data/rds/nigeria_wp.rds\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualising-distribution-of-non-functional-water-points",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualising-distribution-of-non-functional-water-points",
+    "title": "Take-home Exercise 1",
+    "section": "7.2 Visualising Distribution of Non-Functional Water Points",
+    "text": "7.2 Visualising Distribution of Non-Functional Water Points\nHere, we will plot 2 maps, p1 which shows the functional water points and p2 by total number of water points for side-by-side visualization.\n\np1 <- tm_shape(NGA_wp) +\n  tm_fill(\"wp_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of functional water points by LGA\",\n            legend.outside = FALSE)\n\n\np2 <- tm_shape(NGA_wp) +\n  tm_fill(\"total_wp\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of total water points by LGA\",\n            legend.outside = FALSE)\n\n\ntmap_arrange(p2, p1, nrow = 1)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualising-the-sf-layers",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualising-the-sf-layers",
+    "title": "Take-home Exercise 1",
+    "section": "8 Visualising the sf layers",
+    "text": "8 Visualising the sf layers\nIt is to ensure that they have been imported properly and been projected on an appropriate projection system.\n\ntmap_mode(\"view\")\ntm_shape(NGA_wp) +\n  tm_polygons() +\n  tm_dots()\n\n\n\n\n\n\n\nNGA <- as_Spatial(NGA_wp)\n\n\nwpdx_sp <- as(wpdx_spdf, \"SpatialPoints\")\nNGA_sp <- as(NGA, \"SpatialPolygons\")\n\n\nosun = NGA[NGA@data$ADM1_EN == \"Osun\",]\n\nTo plot\n\nplot(osun, main = \"Osun\")\n\n\n\n\nNext, conversion of SpatialPolygonsDataFrame layers into generic spatialpolygons layers\n\nosun_sp = as(osun, \"SpatialPolygons\")\n\nCreating owin object to convert the above spatialpolygons objects into owin objects that is required by spatstat\n\nosun_owin = as(osun_sp, \"owin\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#converting-the-generic-sp-format-into-spatstats-ppp-format",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#converting-the-generic-sp-format-into-spatstats-ppp-format",
+    "title": "Take-home Exercise 1",
+    "section": "8.2 Converting the generic sp format into spatstat’s ppp format",
+    "text": "8.2 Converting the generic sp format into spatstat’s ppp format\nNow, we will use as.ppp() function of spatstat to convert the spatial data into spatstat’s ppp object format.\n\nwpdx_ppp <- as(wpdx_sp, \"ppp\")\nwpdx_ppp\n\nPlanar point pattern: 95008 points\nwindow: rectangle = [32536.8, 1292096.3] x [33461.2, 1091051.6] units\n\n\n\nsummary(wpdx_ppp)\n\nPlanar point pattern:  95008 points\nAverage intensity 7.132208e-08 points per square unit\n\nCoordinates are given to 2 decimal places\ni.e. rounded to the nearest multiple of 0.01 units\n\nWindow: rectangle = [32536.8, 1292096.3] x [33461.2, 1091051.6] units\n                    (1260000 x 1058000 units)\nWindow area = 1.3321e+12 square units\n\n\n\nany(duplicated(wpdx_ppp))\n\n[1] FALSE"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#combining-osun-water-points",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#combining-osun-water-points",
+    "title": "Take-home Exercise 1",
+    "section": "8.3 Combining osun water points",
+    "text": "8.3 Combining osun water points\n\nnigeria_osun_PPP = wpdx_ppp[osun_owin]\n\nrescale() function is used to transform the unit of measurement from metre to kilometre\n\nnigeria_osun_PPP.km = rescale(nigeria_osun_PPP, 1000, \"km\")\n\nPlotting the Osun water point study area\n\nplot(nigeria_osun_PPP.km, main = \"Osun\")\n\n\n\n\nVisualising the SF layer for Osun\n\ntmap_mode(\"view\")\ntm_shape(osun) +\n  tm_polygons() +\n  tm_dots(size = 0.01,\n          border.col = \"black\",\n          border.lwd = 0.5)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#computing-kde-of-osun-state",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#computing-kde-of-osun-state",
+    "title": "Take-home Exercise 1",
+    "section": "9.1 Computing KDE of Osun State",
+    "text": "9.1 Computing KDE of Osun State\nThe code below will be used to compute the KDE of Osun. bw.diggle method is used to derive the bandwidth\n\nplot(density(nigeria_osun_PPP.km, \n             sigma=bw.diggle, \n             edge=TRUE, \n             kernel=\"gaussian\"),\n     main=\"Osun\")\n\n\n\n\nComputing fixed bandwidth KDE\n\nplot(density(nigeria_osun_PPP.km,\n             sigma=0.25, \n             edge=TRUE, \n             kernel=\"gaussian\"),\n     main=\"Osun\")\n\n\n\n\nThe advantage of kernel density map over point map is that it spreads the known quantity in color shades of waterpoints for each location in Osun State of Nigeria. Whereas for Kernel point, it only provides the pointer of waterpoints for each location in Osun State and does not state the number unless clicked.\n\nwpdx_ppp <- as(wpdx_sp, \"ppp\")\nwpdx_ppp\n\nPlanar point pattern: 95008 points\nwindow: rectangle = [32536.8, 1292096.3] x [33461.2, 1091051.6] units\n\n\n\nsummary(wpdx_ppp)\n\nPlanar point pattern:  95008 points\nAverage intensity 7.132208e-08 points per square unit\n\nCoordinates are given to 2 decimal places\ni.e. rounded to the nearest multiple of 0.01 units\n\nWindow: rectangle = [32536.8, 1292096.3] x [33461.2, 1091051.6] units\n                    (1260000 x 1058000 units)\nWindow area = 1.3321e+12 square units\n\n\n\nany(duplicated(wpdx_ppp))\n\n[1] FALSE\n\n\n\nosun1 <- tm_shape(osun) +\n  tm_fill(\"wp_functional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of functional water points by LGA\",\n            legend.outside = FALSE)\n\n\nosun2 <- tm_shape(osun) +\n  tm_fill(\"wp_nonfunctional\",\n          n = 10,\n          style = \"equal\",\n          palette = \"Blues\") +\n  tm_borders(lwd = 0.1,\n             alpha = 1) +\n  tm_layout(main.title = \"Distribution of total water points by LGA\",\n            legend.outside = FALSE)\n\n\ntmap_arrange(osun2, osun1, nrow = 1)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nkde_osun_bw <- density(nigeria_osun_PPP,\n                              sigma=bw.diggle,\n                              edge=TRUE,\n                            kernel=\"gaussian\") \n\n\nplot(kde_osun_bw)\n\n\n\n\n\nosun_bw <- bw.diggle(nigeria_osun_PPP)\nosun_bw\n\n   sigma \n217.8511 \n\n\n\nosun_PPP.km <- rescale(nigeria_osun_PPP, 1000, \"km\")\n\n\nkde_osun_PPP.bw <- density(nigeria_osun_PPP.km, sigma1=bw.diggle, edge=TRUE, kernel=\"gaussian\")\nplot(kde_osun_PPP.bw)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#second-spatial-point-analysis",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#second-spatial-point-analysis",
+    "title": "Take-home Exercise 1",
+    "section": "10 Second Spatial Point Analysis",
+    "text": "10 Second Spatial Point Analysis"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#performing-clarks-evans-test-of-osun-state",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#performing-clarks-evans-test-of-osun-state",
+    "title": "Take-home Exercise 1",
+    "section": "10.1 Performing Clarks Evans Test of Osun State",
+    "text": "10.1 Performing Clarks Evans Test of Osun State\nIn this section, we will perform the Clark-Evans test of aggregation for a spatial point pattern by using clarkevans.test() of statspat.\nThe test hypotheses are:\nHo = The distribution of waterpoints are randomly distributed.\nH1= The distribution of waterpoints are not randomly distributed.\nThe 95% confidence interval will be used.\n\nclarkevans.test(nigeria_osun_PPP,\n                correction=\"none\",\n                clipregion=NULL,\n                alternative=c(\"two.sided\"),\n                nsim=999)\n\n\n    Clark-Evans test\n    No edge correction\n    Monte Carlo test based on 999 simulations of CSR with fixed n\n\ndata:  nigeria_osun_PPP\nR = 0.42836, p-value = 0.002\nalternative hypothesis: two-sided\n\n\nGiven the p value of 0.002 which is lesser than 0.05 of 95% confidence interval, we can conclude that the null hypothesis (H0) should be rejected and the distribution of waterpoints are not randomly distributed."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#analysing-second-spatial-point-using-l-function",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#analysing-second-spatial-point-using-l-function",
+    "title": "Take-home Exercise 1",
+    "section": "10.2 Analysing Second Spatial Point using L function",
+    "text": "10.2 Analysing Second Spatial Point using L function\nIn this section, second spatial point L-function will be using Lest() of spatstat package. Monta carlo simulation test will be used using envelope() of spatstat package."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#computing-l-function-estimation",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#computing-l-function-estimation",
+    "title": "Take-home Exercise 1",
+    "section": "10.2.1 Computing L Function Estimation",
+    "text": "10.2.1 Computing L Function Estimation\n\n#L_ck = Lest(nigeria_osun_PPP, correction = \"Ripley\")\n#plot(L_ck, . -r ~ r, \n    # ylab= \"L(d)-r\", xlab = \"d(m)\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#performing-complete-spatial-random-test",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#performing-complete-spatial-random-test",
+    "title": "Take-home Exercise 1",
+    "section": "10.2.2 Performing Complete Spatial Random Test",
+    "text": "10.2.2 Performing Complete Spatial Random Test\nTo confirm the observed spatial patterns above, a hypothesis test will be conducted. The hypothesis and test are as follows:\nHo = The distribution of Water Point at Osun State are randomly distributed.\nH1= The distribution of Water Point at Osun State are not randomly distributed.\nThe null hypothesis will be rejected if p-value if smaller than alpha value of 0.001.\nThe code chunk below is used to perform the hypothesis testing\n\n#L_ck.csr <- envelope(nigeria_osun_PPP, Lest, nsim = 39, rank = 1, glocal=TRUE)\n\n\n#plot(L_ck.csr, . - r ~ r, xlab=\"d\", ylab=\"L(d)-r\")\n\n\nAs shown in the chart, given the L_ck.csr plotted graph exited the envelope this shows that it is lesser than 0.05 of 95% confidence interval, H0 is rejected and we can conclude that the distribution of waterpoints are not randomly distributed."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#local-colocation-quotients-lclq",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#local-colocation-quotients-lclq",
+    "title": "Take-home Exercise 1",
+    "section": "11 Local Colocation Quotients (LCLQ)",
+    "text": "11 Local Colocation Quotients (LCLQ)\n\n#wpdx_lclq <- wpdx_sf_nga %>% \n  #filter(status_clean %in% \n           #c(\"Functional\",\n            #\"Non-Functional\"))"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualizing-the-sf-layer",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#visualizing-the-sf-layer",
+    "title": "Take-home Exercise 1",
+    "section": "11.1 Visualizing the sf layer",
+    "text": "11.1 Visualizing the sf layer\n\n#tmap_mode(\"view\")\n#tm_shape(osun) +\n  #tm_polygons() +\n  #tm_shape(wpdx_lclq) +\n  #tm_dots(col = \"status_clean\", \n          #size = 0.01,\n          #border.col = \"black\",\n          #border.lwd = 0.5)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#applying-local-colocation-quotients-lclq",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html#applying-local-colocation-quotients-lclq",
+    "title": "Take-home Exercise 1",
+    "section": "11.2 Applying Local Colocation Quotients (LCLQ)",
+    "text": "11.2 Applying Local Colocation Quotients (LCLQ)\n\n#nb <- include_self(\n  #st_knn(st_geometry(wpdx_lclq), 6))\n\n\n#wt <- st_kernel_weights(nb,\n                        #wpdx_lclq, \n                        #\"gaussian\",\n                        #adaptive = TRUE)\n\n\n#Functional <- wpdx_lclq %>%\n  #filter(status_clean == \"Functional\")\n#A <- Functional$status_clean\n\n\n#NonFunctional <- wpdx_lclq %>%\n  #filter(status_clean == \"Non-Functional\")\n#B <- NonFunctional$status_clean\n\n\n#LCLQ <- local_colocation(A, B, nb, wt , 20)\n\n\n#LCLQ_sf_nga <- cbind(wpdx_lclq, LCLQ)\n\n\n#tmap_mode(\"view\")\n#tm_shape(osun) +\n  #tm_polygons() +\n  #tm_shape(LCLQ_sf_nga) +\n  #tm_dots(col = \"status_clean\", \n          #size = 0.01,\n          #border.col = \"black\",\n          #border.lwd = 0.5)"
   }
 ]
