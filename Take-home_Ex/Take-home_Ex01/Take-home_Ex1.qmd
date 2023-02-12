@@ -549,6 +549,10 @@ As shown in the chart, given the L_ck.csr plotted graph exited the envelope this
 
 ## 11 Local Colocation Quotients (LCLQ)
 
+Note:
+
+The following code chunks above are commented to allow the take_home_ex1.html file (over 70mb) to commit and push to my github repository. The images from section 11 onwards are statically pasted to reduce the file size.
+
 Before we perform the local colocation quotients, We will the wpdx_sf_nga dataframes to include both functional and non-functional water points only.
 
 ```{r}
@@ -643,9 +647,5 @@ Finally, we will use the tmap() to visualise the results of LCLQ.
 From the visualisation above, we can conclude that there are many 'missing' water points in Osun which implies that the points on the upper side of Osun State are more concentrated. Thus, we will reject H1 for this case since the concentration are generally low.
 
 After performing the 'clark evans test', 'L function' and the 'local colocation quotients', we can conclude that H0 is rejected, the functional and non functional water points in Osun State are not randomly distributed with low concentration where the upper part of Osun state are slightly more concentrated.
-
-Note to Professor,
-
-I have commented out the code chunks above after section 11 because when rendered, the take_home_ex1.html file is over 70mb which I have issue committing and pushing to my github repository. The images from section 11 onwards are statically pasted to reduce the file size.
 
 End of take home exercise 1
