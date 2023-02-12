@@ -95,8 +95,8 @@ After running the code, we can confirm that the data frame has been converted to
 Since WPdx+ data set is in csv format, we will use read_csv() of readr package to import Water_Point_Data_Exchange\_-\_PlusWPdx.csv and output it to an R object called wpdx.
 
 ```{r}
-wpdx <- read_csv("data/Aspatial/Water_Point_Data_Exchange.csv") %>%
-  filter(`#clean_country_name` == "Nigeria")
+wpdx <- read_csv("data/Aspatial/Water_Point_Data_Exchange.csv") %>% filter(`#clean_country_name` == "Nigeria")
+
 ```
 
 ```{r}
@@ -196,9 +196,9 @@ wpdx_sf_nga <- wpdx_sf %>%
   mutate(status_clean = replace_na(status_clean, "unknown"))
 ```
 
-## 6.2 Filtering Data
+## 6.2 ing Data
 
-With our previous knowledge, we can filter the data to obtain functional proportion counts in each LGA level. We will filter the wpdx_sf_nga dataframes to option functional and non-functional water points.
+With our previous knowledge, we can the data to obtain functional proportion counts in each LGA level. We will the wpdx_sf_nga dataframes to option functional and non-functional water points.
 
 ```{r}
 wpdx_func <- wpdx_sf_nga %>% 
@@ -208,7 +208,7 @@ wpdx_func <- wpdx_sf_nga %>%
              "Functional but needs repair"))
 wpdx_nonfunc <- wpdx_sf_nga %>% 
   filter(status_clean %in%
-          c("Abandoned/Decommissioned", 
+          c("Abadoned/Decommissioned", 
             "Abandoned",
             "Non-Functional due to dry season",
             "Non-Functional",
@@ -549,14 +549,18 @@ As shown in the chart, given the L_ck.csr plotted graph exited the envelope this
 
 ## 11 Local Colocation Quotients (LCLQ)
 
+Before we perform the local colocation quotients, We will the wpdx_sf_nga dataframes to include both functional and non-functional water points only.
+
 ```{r}
-#wpdx_lclq <- wpdx_sf_nga %>% 
-  #filter(status_clean %in% 
-           #c("Functional",
-            #"Non-Functional"))
+ wpdx_lclq <- wpdx_sf_nga %>% 
+   filter(status_clean %in% 
+            c("Functional",
+             "Non-Functional"))
 ```
 
 ## 11.1 Visualizing the sf layer
+
+Firstly, we want to visualise and observe how the sf layer will look like with the water points in osun.
 
 ```{r}
 #tmap_mode("view")
@@ -569,14 +573,24 @@ As shown in the chart, given the L_ck.csr plotted graph exited the envelope this
           #border.lwd = 0.5)
 ```
 
-![](images/sf_visualisation.PNG)
-
 ## 11.2 Applying Local Colocation Quotients (LCLQ)
+
+In this section, we will perform the Local Colocation Quotients (LCLQ) to measure the concentration of the waterpoints in Osun by using local_colocation.
+
+After visualising the sf layers, it looks like most waterpoints in the Osun state are highly concentrated. Thus, the test hypotheses are:
+
+Ho = The concentration of the waterpoints in the Osun generally low
+
+H1= The concentration of the waterpoints in the Osun state are generally high
+
+To perform the Local Colocation Quotients (LCLQ), we will first identify the k nearest neighbors for given point geometry.
 
 ```{r}
 #nb <- include_self(
   #st_knn(st_geometry(wpdx_lclq), 6))
 ```
+
+After that, we will create a weights list using a kernel function.
 
 ```{r}
 #wt <- st_kernel_weights(nb,
@@ -585,35 +599,53 @@ As shown in the chart, given the L_ck.csr plotted graph exited the envelope this
                         #adaptive = TRUE)
 ```
 
+We will filter functional and non-functional from the wpdx_lclq whereby Functional will be A and Nonfunctional will be B.
+
 ```{r}
 #Functional <- wpdx_lclq %>%
-  #filter(status_clean == "Functional")
+  #(status_clean == "Functional")
 #A <- Functional$status_clean
 ```
 
 ```{r}
 #NonFunctional <- wpdx_lclq %>%
-  #filter(status_clean == "Non-Functional")
+  #(status_clean == "Non-Functional")
 #B <- NonFunctional$status_clean
 ```
+
+We will use the local_colocation() to calculate LCLQ.
 
 ```{r}
 #LCLQ <- local_colocation(A, B, nb, wt , 20)
 ```
 
+After that, we will use the column bind function to merge two data frames together given that the number of rows in both the data frames are equal.
+
 ```{r}
 #LCLQ_sf_nga <- cbind(wpdx_lclq, LCLQ)
 ```
+
+Finally, we will use the tmap() to visualise the results of LCLQ.
 
 ```{r}
 #tmap_mode("view")
 #tm_shape(osun) +
   #tm_polygons() +
   #tm_shape(LCLQ_sf_nga) +
-  #tm_dots(col = "status_clean", 
+  #tm_dots(col = "Non.Functional", 
           #size = 0.01,
           #border.col = "black",
           #border.lwd = 0.5)
 ```
 
-![](images/lclq_image.PNG)
+![](/Take-home_Ex/lclq_image.PNG)
+
+From the visualisation above, we can conclude that there are many 'missing' water points in Osun which implies that the points on the upper side of Osun State are more concentrated. Thus, we will reject H1 for this case since the concentration are generally low.
+
+After performing the 'clark evans test', 'L function' and the 'local colocation quotients', we can conclude that H0 is rejected, the functional and non functional water points in Osun State are not randomly distributed with low concentration where the upper part of Osun state are slightly more concentrated.
+
+Note to Professor,
+
+I have commented out the code chunks above after section 11 because when rendered, the take_home_ex1.html file is over 70mb which I have issue committing and pushing to my github repository. The images from section 11 onwards are statically pasted to reduce the file size.
+
+End of take home exercise 1
