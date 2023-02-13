@@ -54,7 +54,6 @@ nb <- include_self(
   st_knn(st_geometry(stores), 6))
 ```
 
-
 ```{r}
 wt <- st_kernel_weights(nb,
                         stores, 
