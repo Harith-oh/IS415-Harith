@@ -1,0 +1,279 @@
+---
+title: "In-class Exercise 7"
+author: "Harith Oh Yee Choon"
+date: "20 Februrary 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute:
+  eval: true
+  echo: true
+  warning: false
+editor: visual
+---
+
+# Global and Local Measures of Spatial Autocorrelation - SFDEP
+
+# Overview
+
+In this hands-on exercise, you will learn how to compute Global and Local Measure of Spatial Autocorrelation (GLSA) by using **spdep** package. By the end to this hands-on exercise, you will be able to:
+
+-   import geospatial data using appropriate function(s) of **sf** package,
+
+-   import csv file using appropriate function of **readr** package,
+
+-   perform relational join using appropriate join function of **dplyr** package,
+
+-   compute Global Spatial Autocorrelation (GSA) statistics by using appropriate functions of **spdep** package,
+
+    -   plot Moran scatterplot,
+
+    -   compute and plot spatial correlogram using appropriate function of **spdep** package.
+
+-   compute Local Indicator of Spatial Association (LISA) statistics for detecting clusters and outliers by using appropriate functions **spdep** package;
+
+-   compute Getis-Ord's Gi-statistics for detecting hot spot or/and cold spot area by using appropriate functions of **spdep** package; and
+
+-   to visualise the analysis output by using **tmap** package.
+
+# 1. Installing and Loading R packages
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse, plotly, zoo, Kendall)
+```
+
+## 1.1 Importing the Geospatial Data
+
+The code chunk below uses st_read() of sf package to import Hunan shapefile into R. The imported shapefile will be simple features Object of sf.
+
+```{r}
+hunan <- st_read(dsn = "Data/Geospatial", 
+                 layer = "Hunan")
+```
+
+## 1.2 Importing CSV file into environment
+
+Next, we will import Hunan_2012.csv into R by using read_csv() of readr package. The output is R dataframe class.
+
+```{r}
+hunan2012 <- read_csv("Data/Aspatial/Hunan_2012.csv")
+```
+
+## 1.3 Performing relational join
+
+The code chunk below will be used to update the attribute table of hunan's SpatialPolygonsDataFrame with the attribute fields of hunan2012 dataframe. This is performed by using left_join() of dplyr package.
+
+*In order to retain the geospatial properties, the left data frame must be the sf data.frame (i.e. hunan)*
+
+```{r}
+hunan_GDPPC <- left_join(hunan,hunan2012)%>%
+  select(1:4, 7, 15)
+```
+
+# 2. Plotting a Choropleth Map
+
+```{r}
+tmap_mode("plot")
+tm_shape(hunan_GDPPC) +
+  tm_fill("GDPPC",
+          style = "quantile", 
+          palette = "Blues",
+          title = "GDPPC") +
+  tm_layout(main.title = "Distribution of GDP per captial by district",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.height = 0.45,
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar() + 
+  tm_grid(alpha = 0.2)
+```
+
+# 3. Deriving the contiguity weights
+
+## 3.1 Contiguity weights: Queen's method
+
+```{r}
+wm_q <- hunan_GDPPC %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1)
+```
+
+## 3.2 Contiguity weights: Rook's method
+
+```{r}
+wm_r <- hunan_GDPPC %>%
+  mutate(nb = st_contiguity(geometry),
+  queen = FALSE,
+  wt = st_weights(nb,
+                  style = "W"),
+  .before = 1)
+```
+
+## 3.3 Computing Global Moran I
+
+```{r}
+moranI <- global_moran(wm_q$GDPPC,
+                        wm_q$nb,
+                        wm_q$wt)
+```
+
+## 3.4 Performing Global Moran I's Test
+
+```{r}
+global_moran_test(wm_q$GDPPC,
+                  wm_q$nb,
+                  wm_q$wt)
+```
+
+## 3.5 Performing Global Moran's I permutation test
+
+To ensure results stay the same when rendering every time
+
+```{r}
+set.seed(1234)
+```
+
+```{r}
+global_moran_perm(wm_q$GDPPC,
+                  wm_q$nb,
+                  wm_q$wt,
+                  nsim = 99)
+```
+
+If observation values are small, it is better to use a higher number of simulations
+
+## 3.6 Computing local Moran's I
+
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99),
+    .before = 1) %>%
+  unnest(local_moran)
+
+lisa
+```
+
+Variable mean and pysal value should be the same. For take home exercise 2, stay with mean
+
+## 3.7 Visualising local Moran's I
+
+### 3.7.1 Computing ii
+
+```{r}
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))
+```
+
+### 3.7.2 Computing p_ii
+
+```{r}
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_fill("p_ii") +
+  tm_borders(alpha = 0.5)
+```
+
+Ideally should use p_ii_sim variable of lisa so that results produced is stable.
+
+### 3.7.3 Visualising the local Moran's I Map
+
+```{r}
+lisa_sig <- lisa %>%
+  filter(p_ii < 0.05)
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
+```
+
+For take home exercise 2, add on to use insignificant on top of LL,HL,LH,HH, no need to use LISA but hot & cold spot areas
+
+# 4. Hot Spot and Cold Spot Analysis
+
+```{r}
+HCSA <- wm_q %>%
+  mutate(local_GI = local_gstar_perm(
+    GDPPC, nb, wt, nsim = 99),
+    .before = 1) %>%
+  unnest(local_GI)
+
+HCSA
+```
+
+## 4.1 Visualising Gi\*
+
+```{r}
+tmap_mode("view")
+tm_shape(HCSA) +
+  tm_fill("gi_star") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))
+```
+
+## 4.2 Visualising the p value of HCSA
+
+```{r}
+tmap_mode("plot")
+tm_shape(HCSA) +
+  tm_fill("p_sim") +
+  tm_borders(alpha = 0.5)
+```
+
+# 5. Mann-Kendall Test
+
+## 5.1 Import files of Hunan GDPPC
+
+```{r}
+GDPPC <- read_csv("Data/Aspatial/Hunan_GDPPC.csv")
+```
+
+### 5.1.1 Creating a time series cube
+
+```{r}
+GDPPC_st <- spacetime(GDPPC, hunan,
+                      .loc_col = "County",
+                      .time_col = "Year")
+```
+
+To construct spacetime cube, we must obtain the location and time
+
+```{r}
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(
+    nb = include_self(st_contiguity(geometry)),
+    wt = st_weights(nb)
+  ) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+```
+
+## 5.2 Arrange to show significant hotspot and coldspot areas
+
+```{r}
+
+```
+
+## 5.3 Performing Emerging Hotspot Analysis
+
+```{r}
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st,
+  .var = "GDPPC",
+  k = 1,
+  nsim = 99
+)
+```
+
+## 5.4 Visualising EHSA

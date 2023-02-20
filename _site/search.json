@@ -551,5 +551,117 @@
     "title": "In-class_Ex06",
     "section": "Contingency neighbours method",
     "text": "Contingency neighbours method\nIn the code chunk below, st_contiguity() is used to derive a continguity neighbour list by using queen’s method.\n\ncn_queen <-hunan_GDPPC %>%\n  mutate(nb = st_contiguity(geometry),\n         .before = 1)\n\nderive a contiguity neighbour list Using Rook’s method\n\ncn_rook <- hunan_GDPPC %>%\n  mutate(nb =st_contiguity(geometry),\n         queen =FALSE,\n         .before = 1)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#importing-the-geospatial-data",
+    "href": "In-class_Ex/In-class_Ex07.html#importing-the-geospatial-data",
+    "title": "In-class Exercise 7",
+    "section": "1.1 Importing the Geospatial Data",
+    "text": "1.1 Importing the Geospatial Data\nThe code chunk below uses st_read() of sf package to import Hunan shapefile into R. The imported shapefile will be simple features Object of sf.\n\nhunan <- st_read(dsn = \"Data/Geospatial\", \n                 layer = \"Hunan\")\n\nReading layer `Hunan' from data source \n  `C:\\Harith-oh\\IS415-Harith\\In-class_Ex\\data\\Geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#importing-csv-file-into-environment",
+    "href": "In-class_Ex/In-class_Ex07.html#importing-csv-file-into-environment",
+    "title": "In-class Exercise 7",
+    "section": "1.2 Importing CSV file into environment",
+    "text": "1.2 Importing CSV file into environment\nNext, we will import Hunan_2012.csv into R by using read_csv() of readr package. The output is R dataframe class.\n\nhunan2012 <- read_csv(\"Data/Aspatial/Hunan_2012.csv\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#performing-relational-join",
+    "href": "In-class_Ex/In-class_Ex07.html#performing-relational-join",
+    "title": "In-class Exercise 7",
+    "section": "1.3 Performing relational join",
+    "text": "1.3 Performing relational join\nThe code chunk below will be used to update the attribute table of hunan’s SpatialPolygonsDataFrame with the attribute fields of hunan2012 dataframe. This is performed by using left_join() of dplyr package.\nIn order to retain the geospatial properties, the left data frame must be the sf data.frame (i.e. hunan)\n\nhunan_GDPPC <- left_join(hunan,hunan2012)%>%\n  select(1:4, 7, 15)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#contiguity-weights-queens-method",
+    "href": "In-class_Ex/In-class_Ex07.html#contiguity-weights-queens-method",
+    "title": "In-class Exercise 7",
+    "section": "3.1 Contiguity weights: Queen’s method",
+    "text": "3.1 Contiguity weights: Queen’s method\n\nwm_q <- hunan_GDPPC %>%\n  mutate(nb = st_contiguity(geometry),\n         wt = st_weights(nb,\n                         style = \"W\"),\n         .before = 1)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#contiguity-weights-rooks-method",
+    "href": "In-class_Ex/In-class_Ex07.html#contiguity-weights-rooks-method",
+    "title": "In-class Exercise 7",
+    "section": "3.2 Contiguity weights: Rook’s method",
+    "text": "3.2 Contiguity weights: Rook’s method\n\nwm_r <- hunan_GDPPC %>%\n  mutate(nb = st_contiguity(geometry),\n  queen = FALSE,\n  wt = st_weights(nb,\n                  style = \"W\"),\n  .before = 1)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#computing-global-moran-i",
+    "href": "In-class_Ex/In-class_Ex07.html#computing-global-moran-i",
+    "title": "In-class Exercise 7",
+    "section": "3.3 Computing Global Moran I",
+    "text": "3.3 Computing Global Moran I\n\nmoranI <- global_moran(wm_q$GDPPC,\n                        wm_q$nb,\n                        wm_q$wt)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#performing-global-moran-is-test",
+    "href": "In-class_Ex/In-class_Ex07.html#performing-global-moran-is-test",
+    "title": "In-class Exercise 7",
+    "section": "3.4 Performing Global Moran I’s Test",
+    "text": "3.4 Performing Global Moran I’s Test\n\nglobal_moran_test(wm_q$GDPPC,\n                  wm_q$nb,\n                  wm_q$wt)\n\n\n    Moran I test under randomisation\n\ndata:  x  \nweights: listw    \n\nMoran I statistic standard deviate = 4.7351, p-value = 1.095e-06\nalternative hypothesis: greater\nsample estimates:\nMoran I statistic       Expectation          Variance \n      0.300749970      -0.011494253       0.004348351"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#performing-global-morans-i-permutation-test",
+    "href": "In-class_Ex/In-class_Ex07.html#performing-global-morans-i-permutation-test",
+    "title": "In-class Exercise 7",
+    "section": "3.5 Performing Global Moran’s I permutation test",
+    "text": "3.5 Performing Global Moran’s I permutation test\nTo ensure results stay the same when rendering every time\n\nset.seed(1234)\n\n\nglobal_moran_perm(wm_q$GDPPC,\n                  wm_q$nb,\n                  wm_q$wt,\n                  nsim = 99)\n\n\n    Monte-Carlo simulation of Moran I\n\ndata:  x \nweights: listw  \nnumber of simulations + 1: 100 \n\nstatistic = 0.30075, observed rank = 100, p-value < 2.2e-16\nalternative hypothesis: two.sided\n\n\nIf observation values are small, it is better to use a higher number of simulations"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#computing-local-morans-i",
+    "href": "In-class_Ex/In-class_Ex07.html#computing-local-morans-i",
+    "title": "In-class Exercise 7",
+    "section": "3.6 Computing local Moran’s I",
+    "text": "3.6 Computing local Moran’s I\n\nlisa <- wm_q %>%\n  mutate(local_moran = local_moran(\n    GDPPC, nb, wt, nsim = 99),\n    .before = 1) %>%\n  unnest(local_moran)\n\nlisa\n\nSimple feature collection with 88 features and 20 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\n# A tibble: 88 × 21\n         ii        eii   var_ii    z_ii    p_ii p_ii_…¹ p_fol…² skewn…³ kurtosis\n      <dbl>      <dbl>    <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>    <dbl>\n 1 -0.00147  0.00177    4.18e-4 -0.158  0.874      0.82    0.41  -0.812  0.652  \n 2  0.0259   0.00641    1.05e-2  0.190  0.849      0.96    0.48  -1.09   1.89   \n 3 -0.0120  -0.0374     1.02e-1  0.0796 0.937      0.76    0.38   0.824  0.0461 \n 4  0.00102 -0.0000349  4.37e-6  0.506  0.613      0.64    0.32   1.04   1.61   \n 5  0.0148  -0.00340    1.65e-3  0.449  0.654      0.5     0.25   1.64   3.96   \n 6 -0.0388  -0.00339    5.45e-3 -0.480  0.631      0.82    0.41   0.614 -0.264  \n 7  3.37    -0.198      1.41e+0  3.00   0.00266    0.08    0.04   1.46   2.74   \n 8  1.56    -0.265      8.04e-1  2.04   0.0417     0.08    0.04   0.459 -0.519  \n 9  4.42     0.0450     1.79e+0  3.27   0.00108    0.02    0.01   0.746 -0.00582\n10 -0.399   -0.0505     8.59e-2 -1.19   0.234      0.28    0.14  -0.685  0.134  \n# … with 78 more rows, 12 more variables: mean <fct>, median <fct>,\n#   pysal <fct>, nb <nb>, wt <list>, NAME_2 <chr>, ID_3 <int>, NAME_3 <chr>,\n#   ENGTYPE_3 <chr>, County <chr>, GDPPC <dbl>, geometry <POLYGON [°]>, and\n#   abbreviated variable names ¹​p_ii_sim, ²​p_folded_sim, ³​skewness\n\n\nVariable mean and pysal value should be the same. For take home exercise 2, stay with mean"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#visualising-local-morans-i",
+    "href": "In-class_Ex/In-class_Ex07.html#visualising-local-morans-i",
+    "title": "In-class Exercise 7",
+    "section": "3.7 Visualising local Moran’s I",
+    "text": "3.7 Visualising local Moran’s I\n\n3.7.1 Computing ii\n\ntmap_mode(\"plot\")\ntm_shape(lisa) +\n  tm_fill(\"ii\") +\n  tm_borders(alpha = 0.5) +\n  tm_view(set.zoom.limits = c(6,8))\n\n\n\n\n\n\n3.7.2 Computing p_ii\n\ntmap_mode(\"plot\")\ntm_shape(lisa) +\n  tm_fill(\"p_ii\") +\n  tm_borders(alpha = 0.5)\n\n\n\n\nIdeally should use p_ii_sim variable of lisa so that results produced is stable.\n\n\n3.7.3 Visualising the local Moran’s I Map\n\nlisa_sig <- lisa %>%\n  filter(p_ii < 0.05)\ntmap_mode(\"plot\")\ntm_shape(lisa) +\n  tm_polygons() +\n  tm_borders(alpha = 0.5) +\ntm_shape(lisa_sig) +\n  tm_fill(\"mean\") + \n  tm_borders(alpha = 0.4)\n\n\n\n\nFor take home exercise 2, add on to use insignificant on top of LL,HL,LH,HH, no need to use LISA but hot & cold spot areas"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#visualising-gi",
+    "href": "In-class_Ex/In-class_Ex07.html#visualising-gi",
+    "title": "In-class Exercise 7",
+    "section": "4.1 Visualising Gi*",
+    "text": "4.1 Visualising Gi*\n\ntmap_mode(\"view\")\ntm_shape(HCSA) +\n  tm_fill(\"gi_star\") +\n  tm_borders(alpha = 0.5) +\n  tm_view(set.zoom.limits = c(6,8))"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#visualising-the-p-value-of-hcsa",
+    "href": "In-class_Ex/In-class_Ex07.html#visualising-the-p-value-of-hcsa",
+    "title": "In-class Exercise 7",
+    "section": "4.2 Visualising the p value of HCSA",
+    "text": "4.2 Visualising the p value of HCSA\n\ntmap_mode(\"plot\")\ntm_shape(HCSA) +\n  tm_fill(\"p_sim\") +\n  tm_borders(alpha = 0.5)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#import-files-of-hunan-gdppc",
+    "href": "In-class_Ex/In-class_Ex07.html#import-files-of-hunan-gdppc",
+    "title": "In-class Exercise 7",
+    "section": "5.1 Import files of Hunan GDPPC",
+    "text": "5.1 Import files of Hunan GDPPC\n\nGDPPC <- read_csv(\"Data/Aspatial/Hunan_GDPPC.csv\")\n\n\n5.1.1 Creating a time series cube\n\nGDPPC_st <- spacetime(GDPPC, hunan,\n                      .loc_col = \"County\",\n                      .time_col = \"Year\")\n\nTo construct spacetime cube, we must obtain the location and time\n\nGDPPC_nb <- GDPPC_st %>%\n  activate(\"geometry\") %>%\n  mutate(\n    nb = include_self(st_contiguity(geometry)),\n    wt = st_weights(nb)\n  ) %>%\n  set_nbs(\"nb\") %>%\n  set_wts(\"wt\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#arrange-to-show-significant-hotspot-and-coldspot-areas",
+    "href": "In-class_Ex/In-class_Ex07.html#arrange-to-show-significant-hotspot-and-coldspot-areas",
+    "title": "In-class Exercise 7",
+    "section": "5.2 Arrange to show significant hotspot and coldspot areas",
+    "text": "5.2 Arrange to show significant hotspot and coldspot areas"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#performing-emerging-hotspot-analysis",
+    "href": "In-class_Ex/In-class_Ex07.html#performing-emerging-hotspot-analysis",
+    "title": "In-class Exercise 7",
+    "section": "5.3 Performing Emerging Hotspot Analysis",
+    "text": "5.3 Performing Emerging Hotspot Analysis\n\nehsa <- emerging_hotspot_analysis(\n  x = GDPPC_st,\n  .var = \"GDPPC\",\n  k = 1,\n  nsim = 99\n)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#visualising-ehsa",
+    "href": "In-class_Ex/In-class_Ex07.html#visualising-ehsa",
+    "title": "In-class Exercise 7",
+    "section": "5.4 Visualising EHSA",
+    "text": "5.4 Visualising EHSA"
   }
 ]
