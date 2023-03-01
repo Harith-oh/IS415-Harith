@@ -28,17 +28,17 @@ Geospatial Data:
 
 This study will focus of Osun State, Nigeria. The state boundary GIS data of Nigeria can be downloaded either from The [Humanitarian Data Exchange](https://data.humdata.org/) portal or [geoBoundaries](https://www.geoboundaries.org/).
 
-+-----------------------------------------+------------+-------------+----------------------------------------------+
-| Data                                    | Format     | Description | Source                                       |
-+=========================================+============+=============+==============================================+
-| Nigeria Level-2 Administrative Boundary | Shapefile  |             | Humanitarian Data Exchange(data.humdata.org) |
-|                                         |            |             |                                              |
-|                                         |            |             | or                                           |
-|                                         |            |             |                                              |
-|                                         |            |             | geoBoundaries (geoboundaries.org)            |
-+-----------------------------------------+------------+-------------+----------------------------------------------+
-| WPdx Global Data Repositories (WPdx+)   | CSV        |             | waterpointdata.org                           |
-+-----------------------------------------+------------+-------------+----------------------------------------------+
++-----------------------------------------+-----------+-------------+----------------------------------------------+
+| Data                                    | Format    | Description | Source                                       |
++=========================================+===========+=============+==============================================+
+| Nigeria Level-2 Administrative Boundary | Shapefile |             | Humanitarian Data Exchange(data.humdata.org) |
+|                                         |           |             |                                              |
+|                                         |           |             | or                                           |
+|                                         |           |             |                                              |
+|                                         |           |             | geoBoundaries (geoboundaries.org)            |
++-----------------------------------------+-----------+-------------+----------------------------------------------+
+| WPdx Global Data Repositories (WPdx+)   | CSV       |             | waterpointdata.org                           |
++-----------------------------------------+-----------+-------------+----------------------------------------------+
 
 ## 3 Install and load packages
 
