@@ -1,0 +1,168 @@
+---
+title: "In-class Exercise 8: Building hedonic pricing model with gwr"
+author: "Harith Oh Yee Choon"
+date: "6 March 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute:
+  eval: true
+  echo: true
+  warning: false
+editor: visual
+---
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary, readr)
+```
+
+13.5 Geospatial Data Wrangling 13.5.1 Importing geospatial data The geospatial data used in this hands-on exercise is called MP14_SUBZONE_WEB_PL. It is in ESRI shapefile format. The shapefile consists of URA Master Plan 2014's planning subzone boundaries. Polygon features are used to represent these geographic boundaries. The GIS data is in svy21 projected coordinates systems.
+
+The code chunk below is used to import MP_SUBZONE_WEB_PL shapefile by using st_read() of sf packages.
+
+```{r}
+mpsz = st_read(dsn = "data/Geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+
+Reading layer `MP14_SUBZONE_WEB_PL' from data source`D:\tskam\r4gdsa\chap13\data\geospatial' using driver \`ESRI Shapefile' Simple feature collection with 323 features and 15 fields Geometry type: MULTIPOLYGON Dimension: XY Bounding box: xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33 Projected CRS: SVY21 The report above shows that the R object used to contain the imported MP14_SUBZONE_WEB_PL shapefile is called mpsz and it is a simple feature object. The geometry type is multipolygon. it is also important to note that mpsz simple feature object does not have EPSG information.
+
+13.5.2 Updating CRS information The code chunk below updates the newly imported mpsz with the correct ESPG code (i.e. 3414)
+
+```{r}
+mpsz_svy21 <- st_transform(mpsz, 3414)
+```
+
+After transforming the projection metadata, you can varify the projection of the newly transformed mpsz_svy21 by using st_crs() of sf package.
+
+The code chunk below will be used to varify the newly transformed mpsz_svy21.
+
+```{r}
+st_crs(mpsz_svy21)
+```
+
+Coordinate Reference System: User input: EPSG:3414 wkt: PROJCRS\["SVY21 / Singapore TM", BASEGEOGCRS\["SVY21", DATUM\["SVY21", ELLIPSOID\["WGS 84",6378137,298.257223563, LENGTHUNIT\["metre",1\]\]\], PRIMEM\["Greenwich",0, ANGLEUNIT\["degree",0.0174532925199433\]\], ID\["EPSG",4757\]\], CONVERSION\["Singapore Transverse Mercator", METHOD\["Transverse Mercator", ID\["EPSG",9807\]\], PARAMETER\["Latitude of natural origin",1.36666666666667, ANGLEUNIT\["degree",0.0174532925199433\], ID\["EPSG",8801\]\], PARAMETER\["Longitude of natural origin",103.833333333333, ANGLEUNIT\["degree",0.0174532925199433\], ID\["EPSG",8802\]\], PARAMETER\["Scale factor at natural origin",1, SCALEUNIT\["unity",1\], ID\["EPSG",8805\]\], PARAMETER\["False easting",28001.642, LENGTHUNIT\["metre",1\], ID\["EPSG",8806\]\], PARAMETER\["False northing",38744.572, LENGTHUNIT\["metre",1\], ID\["EPSG",8807\]\]\], CS\[Cartesian,2\], AXIS\["northing (N)",north, ORDER\[1\], LENGTHUNIT\["metre",1\]\], AXIS\["easting (E)",east, ORDER\[2\], LENGTHUNIT\["metre",1\]\], USAGE\[ SCOPE\["Cadastre, engineering survey, topographic mapping."\], AREA\["Singapore - onshore and offshore."\], BBOX\[1.13,103.59,1.47,104.07\]\], ID\["EPSG",3414\]\] Notice that the EPSG: is indicated as 3414 now.
+
+Next, you will reveal the extent of mpsz_svy21 by using st_bbox() of sf package.
+
+```{r}
+st_bbox(mpsz_svy21) #view extent
+```
+
+     xmin      ymin      xmax      ymax 
+
+2667.538 15748.721 56396.440 50256.334
+
+13.6 Aspatial Data Wrangling 13.6.1 Importing the aspatial data The condo_resale_2015 is in csv file format. The codes chunk below uses read_csv() function of readr package to import condo_resale_2015 into R as a tibble data frame called condo_resale.
+
+```{r}
+condo_resale = read_csv("data/Aspatial/Condo_resale_2015.csv")
+```
+
+After importing the data file into R, it is important for us to examine if the data file has been imported correctly.
+
+The codes chunks below uses glimpse() to display the data structure of will do the job.
+
+```{r}
+glimpse(condo_resale)
+```
+
+```{r}
+head(condo_resale$LONGITUDE) #see the data in XCOORD column
+```
+
+```{r}
+head(condo_resale$LATITUDE) #see the data in YCOORD column
+```
+
+\[1\] 1.287145 1.328698 1.313727 1.308563 1.321437 1.314198 Next, summary() of base R is used to display the summary statistics of cond_resale tibble data frame.
+
+```{r}
+summary(condo_resale)
+```
+
+13.6.2 Converting aspatial data frame into a sf object Currently, the condo_resale tibble data frame is aspatial. We will convert it to a sf object. The code chunk below converts condo_resale data frame into a simple feature data frame by using st_as_sf() of sf packages.
+
+```{r}
+condo_resale.sf <- st_as_sf(condo_resale,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+Notice that st_transform() of sf package is used to convert the coordinates from wgs84 (i.e. crs:4326) to svy21 (i.e. crs=3414).
+
+Next, head() is used to list the content of condo_resale.sf object.
+
+```{r}
+head(condo_resale.sf)
+```
+
+Notice that the output is in point feature data frame.
+
+```{r}
+corrplot::corrplot(cor(condo_resale[, 5:23]), diag = FALSE, order = "AOE",
+         tl.pos = "td", tl.cex = 0.5, method = "number", type = "upper")
+```
+
+13.7 Exploratory Data Analysis (EDA) In the section, you will learn how to use statistical graphics functions of ggplot2 package to perform EDA.
+
+13.7.1 EDA using statistical graphics We can plot the distribution of SELLING_PRICE by using appropriate Exploratory Data Analysis (EDA) as shown in the code chunk below.
+
+```{r}
+ggplot(data=condo_resale.sf, aes(x=`SELLING_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+
+13.7.2 Multiple Histogram Plots distribution of variables In this section, you will learn how to draw a small multiple histograms (also known as trellis plot) by using ggarrange() of ggpubr package.
+
+The code chunk below is used to create 12 histograms. Then, ggarrange() is used to organised these histogram into a 3 columns by 4 rows small multiple plot.
+
+```{r}
+AREA_SQM <- ggplot(data=condo_resale.sf, aes(x= `AREA_SQM`)) + 
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+AGE <- ggplot(data=condo_resale.sf, aes(x= `AGE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_CBD <- ggplot(data=condo_resale.sf, aes(x= `PROX_CBD`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_CHILDCARE <- ggplot(data=condo_resale.sf, aes(x= `PROX_CHILDCARE`)) + 
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_ELDERLYCARE <- ggplot(data=condo_resale.sf, aes(x= `PROX_ELDERLYCARE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_URA_GROWTH_AREA <- ggplot(data=condo_resale.sf, 
+                               aes(x= `PROX_URA_GROWTH_AREA`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_HAWKER_MARKET <- ggplot(data=condo_resale.sf, aes(x= `PROX_HAWKER_MARKET`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_KINDERGARTEN <- ggplot(data=condo_resale.sf, aes(x= `PROX_KINDERGARTEN`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_MRT <- ggplot(data=condo_resale.sf, aes(x= `PROX_MRT`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_PARK <- ggplot(data=condo_resale.sf, aes(x= `PROX_PARK`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_PRIMARY_SCH <- ggplot(data=condo_resale.sf, aes(x= `PROX_PRIMARY_SCH`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_TOP_PRIMARY_SCH <- ggplot(data=condo_resale.sf, 
+                               aes(x= `PROX_TOP_PRIMARY_SCH`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+ggarrange(AREA_SQM, AGE, PROX_CBD, PROX_CHILDCARE, PROX_ELDERLYCARE, 
+          PROX_URA_GROWTH_AREA, PROX_HAWKER_MARKET, PROX_KINDERGARTEN, PROX_MRT,
+          PROX_PARK, PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,  
+          ncol = 3, nrow = 4)
+```
+
+
+
+
+
+

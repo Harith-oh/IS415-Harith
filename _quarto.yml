@@ -22,13 +22,26 @@ website:
           - href: "In-class_Ex/In-class_Ex06.html"      
             text: "In-class Exercise 6"
           - href: "In-class_Ex/In-class_Ex07.html"      
-            text: "In-class Exercise 7"               
+            text: "In-class Exercise 7" 
+          - href: "In-class_Ex/In-class_Ex08.html"      
+            text: "In-class Exercise 8"
+          - href: "In-class_Ex/In-class_Ex09.html"      
+            text: "In-class Exercise 9"  
+          - href: "In-class_Ex/In-class_Ex10.html"      
+            text: "In-class Exercise 10"
+          - href: "In-class_Ex/In-class_Ex11.html"      
+            text: "In-class Exercise 11"   
+  
+            
       - text: "Take-home Exercise"
         menu: 
           - href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex1.html"      
             text: "Take-home Exercise 1"
           - href: "Take-home_Ex2/Take_home_exe2.html"      
             text: "Take-home Exercise 2"
+          - href: "Take-home_Ex2/Take_home_Ex3.html"      
+            text: "Take-home Exercise 3"
+
 
     right:
       - href: index.qmd
