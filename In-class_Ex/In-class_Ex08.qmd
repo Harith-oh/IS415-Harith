@@ -160,9 +160,3 @@ ggarrange(AREA_SQM, AGE, PROX_CBD, PROX_CHILDCARE, PROX_ELDERLYCARE,
           PROX_PARK, PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,  
           ncol = 3, nrow = 4)
 ```
-
-
-
-
-
-
