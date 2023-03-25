@@ -1,8 +1,8 @@
 ---
-title: "Take Home Exercise 3"
+title: "Take Home Exercise 3: Predicting HDB Public Housing Resale Pricies using Geographically Weighted Methods"
 author: "Harith Oh Yee Choon"
-date: "6 March 2023"
-date-modified: "`r Sys.Date()`"
+date: "09 March 2023"
+date-modified: "25 March 2023"
 format: html
 execute:
   eval: true
@@ -11,18 +11,1177 @@ execute:
 editor: visual
 ---
 
-# Take-home Exercise 3: Predicting HDB Public Housing Resale Pricies using Geographically Weighted Methods
+# Background Information
 
-## Setting the Scene
+In every country, housing is a crucial part of household wealth. Whether for a couple or an individual, owning a home has always been a dream or aspiration. Several things influence housing costs. Some of them have a worldwide scope, such the overall health of a nation's economy or the level of inflation. Some may focus more on the properties themselves. You can further divide these characteristics into structural and geographic ones. Structural considerations are aspects of the property itself, such as its size, configuration, and tenure. Locational factors are elements that relate to the area around the properties, such as closeness to a daycare center, a public transportation stop, and a shopping center.
 
-Housing is an essential component of household wealth worldwide. Buying a housing has always been a major investment for most people. The price of housing is affected by many factors. Some of them are global in nature such as the general economy of a country or inflation rate. Others can be more specific to the properties themselves. These factors can be further divided to structural and locational factors. Structural factors are variables related to the property themselves such as the size, fitting, and tenure of the property. Locational factors are variables related to the neighbourhood of the properties such as proximity to childcare centre, public transport service and shopping centre.
+Standard predictive models for house resale prices were created utilizing the [**Ordinary Least Square (OLS)**](https://en.wikipedia.org/wiki/Ordinary least squares) approach. The spatial autocorrelation and spatial variability present in geographic data sets like housing transactions, however, were not taken into account by this method. The OLS estimate of predictive housing resale pricing models may produce inaccurate, inconsistent, or ineffective findings due to the presence of spatial autocorrelation (Anselin 1998). With this restriction, **Geographic Weighted Models** were developed to calibrate house resale price prediction models.
 
-Conventional, housing resale prices predictive models were built by using [**Ordinary Least Square (OLS)**](https://en.wikipedia.org/wiki/Ordinary_least_squares) method. However, this method failed to take into consideration that spatial autocorrelation and spatial heterogeneity exist in geographic data sets such as housing transactions. With the existence of spatial autocorrelation, the OLS estimation of predictive housing resale pricing models could lead to biased, inconsistent, or inefficient results (Anselin 1998). In view of this limitation, **Geographical Weighted Models** were introduced for calibrating predictive model for housing resale prices.
+# The Objective
 
-## The Task
+FOr this exercise, I am required to forecast HDB resale prices in Singapore for the months of January and February 2023 at the sub-market level (i.e. HDB 3-room, HDB 4-room, and HDB 5-room). The traditional OLS method and GWR approaches must be used to build the predictive models. I must also contrast the performance of the geographically weighted approaches and the traditional OLS method.
 
-In this take-home exercise, you are tasked to predict HDB resale prices at the sub-market level (i.e. HDB 3-room, HDB 4-room and HDB 5-room) for the month of January and February 2023 in Singapore. The predictive models must be built by using by using conventional OLS method and GWR methods. You are also required to compare the performance of the conventional OLS method versus the geographical weighted methods.
+# 1. Datasets
 
-## The Data
+-   **Aspatial dataset**:
 
-For the purpose of this take-home exercise, [`HDB Resale Flat Prices`](https://data.gov.sg/dataset/resale-flat-prices) provided by Data.gov.sg should be used as the core data set. The study should focus on either three-room, four-room or five-room flat and transaction period should be from 1st January 2021 to 31st December 2022. The test data should be January and February 2023 resale prices.
+    -   HDB Resale data: a list of HDB resale transacted prices in Singapore from Jan 2017 onwards. It is in csv format which can be downloaded from Data.gov.sg.
+
+-   **Geospatial dataset**:
+
+    -   *MP14_SUBZONE_WEB_PL*: a polygon feature data providing information of URA 2014 Master Plan Planning Subzone boundary data. It is in ESRI shapefile format. This data set was also downloaded from Data.gov.sg
+
+-   **Location factors with regards to the geographic coordinates**:
+
+    -   Downloaded from **Data.gov.sg**.
+
+        -   **Eldercare** data is a list of eldercare in Singapore. It is in shapefile format.
+
+        -   **Hawker Centre** data is a list of hawker centres in Singapore. It is in geojson format.
+
+        -   **Parks** data is a list of parks in Singapore. It is in geojson format.
+
+        -   **Supermarket** data is a list of supermarkets in Singapore. It is in geojson format.
+
+        -   **CHAS clinics** data is a list of CHAS clinics in Singapore. It is in geojson format.
+
+        -   **Childcare service** data is a list of childcare services in Singapore. It is in geojson format.
+
+        -   **Kindergartens** data is a list of kindergartens in Singapore. It is in geojson format.
+
+    -   Downloaded from **Datamall.lta.gov.sg**.
+
+        -   **MRT** data is a list of MRT/LRT stations in Singapore with the station names and codes. It is in shapefile format.\
+
+        -   **Bus stops** data is a list of bus stops in Singapore. It is in shapefile format.
+
+-   **Location factors without geographic coordinates**:
+
+    -   Downloaded from **Data.gov.sg**.
+
+        -   **Primary school** data is extracted from the list on General information of schools from data.gov portal. It is in csv format.
+
+    -   Retrieved/Scraped from **other sources**
+
+        -   **CBD** coordinates obtained from Google.
+
+        -   **Shopping malls** data is a list of Shopping malls in Singapore obtained from [Wikipedia](https://en.wikipedia.org/wiki/List_of_shopping_malls_in_Singapore).
+
+        -   **Good primary schools** is a list of primary schools that are ordered in ranking in terms of popularity and this can be found at [Local Salary Forum](https://www.salary.sg/2021/best-primary-schools-2021-by-popularity).
+
+# 2. Loading the R packages
+
+The following code chunk will perform the following task. A list called packages will be created and will consists of all the R packages required to accomplish this exercise. There will be a check to see if R packages on package have been installed in R and if not, they will be installed. After which when all the R packages have been installed, the packages will then be loaded
+
+```{r}
+packages <- c('sf', 'tidyverse', 'tmap', 'httr', 'jsonlite', 'rvest', 
+              'sp', 'ggpubr', 'corrplot', 'broom',  'olsrr', 'spdep', 
+              'GWmodel', 'devtools', 'rgeos', 'lwgeom', 'maptools', 'rsample', 'Metrics', 'SpatialML')
+
+for(p in packages){
+  if(!require(p, character.only = T)){
+    install.packages(p, repos = "http://cran.us.r-project.org")
+  }
+  library(p, character.only = T)
+}
+```
+
+```{r}
+library(xaringanExtra)
+```
+
+More on the packages used:
+
+-   sf: used for importing, managing, and processing geospatial data
+
+-   tidyverse: used for importing, wrangling and visualising data. It consists of a family of R packages, such as:
+
+    -   **readr** for importing csv data,
+
+    -   **readxl** for importing Excel worksheet,
+
+    -   **tidyr** for manipulating data,
+
+    -   **dplyr** for transforming data, and
+
+    -   **ggplot2** for visualising data
+
+-   **tmap:** provides functions for plotting cartographic quality *static* inpoint patterns maps or *interactive* maps by using leaflet API.
+
+-   **httr:** Useful tools for working with HTTP organised by HTTP verbs (GET(), POST(), etc). Configuration functions make it easy to control additional request components (authenticate(), add_headers() and so on).
+
+    -   In this analysis, it will be used to send GET requests to OneMapAPI SG to retrieve the coordinates of addresses.
+
+-   **jsonlite:** A simple and robust JSON parser and generator for R. It offers simple, flexible tools for working with JSON in R, and is particularly powerful for building pipelines and interacting with a web API.
+
+-   **rvest:** A new package that makes it easy to scrape (or harvest) data from html web pages, inspired by libraries like beautiful soup.
+
+    -   In this analysis, it will be used to scrape data for **shopping malls** and **good primary schools**
+
+-   **sp:** provides classes and methods for dealing with spatial data in R.
+
+-   **ggpubr:** provides some easy-to-use functions for creating and customizing ggplot2 based publication ready plots
+
+    -   In this analysis, it will be used to arrange multiple ggplots.
+
+-   **corrplot:** For Multivariate data visualisation and analysis
+
+-   **broom:** Takes the messy output of built-in functions in R, such as lm, nls, or t.test, and turns them into tidy tibble.
+
+    -   In this analysis, functions like tidy and glance will be used to construct a tibble / summmary of the model which is easier to look at.
+
+-   **oslrr:** Used to build OLD and performing diagnostic tests.
+
+-   **spdep:** For spatial dependence statistics.
+
+-   **GWmodel:** Calibrate geographical weighted family of modes.
+
+-   **devtools:** used for installing any R packages which is not available in RCRAN. In this exercise, I will be installing using devtools to install the package xaringanExtra which is still under development stage.
+
+-   **xaringanExtra:** is an enhancement of xaringan package. As it is still under development stage, we can still install the current version using install_github function of devtools. This package will be used to add Panelsets to contain both the r code chunk and results whereever applicable.
+
+# 3. Importing of Aspatial Data & Wrangling
+
+read_csv() function of readr package will be used to import resale-flat-prices into R as a tibble data frame called resale. glimpse() function of dplyr package is used to display the data structure
+
+```{r}
+resale <- read_csv("data/aspatial/resale-flat-prices.csv")
+```
+
+```{r}
+glimpse(resale)
+```
+
+When we load in the dataset for the first time, we can see that:
+
+The dataset contains 11 columns with 148,373 rows. The columns that are present in the data are: month, town, flat_type, block, street_name, storey_range, floor_area_sqm, flat_model, lease_commence_date, remaining_lease, resale_price.
+
+For this take home exercise 3, we are allowed the option to choose to perform our analysis between either 3, 4 or 5 room flat transactions. Therefore, I will be selecting the 3 room flat transactions during the transaction period from 1st January 2021 to 31st December 2022. Test data should be included for January and February 2023 resale prices.
+
+## 3.1 Filtering HDB Resale Data
+
+filter() function of dplyr package will be used to select the desired flat_type and dates which will be stored in rs_subset.
+
+```{r}
+rs_subset <-  filter(resale,flat_type == "3 ROOM") %>% 
+              filter(month >= "2021-01" & month <= "2023-02")
+```
+
+unique() function of R package will be used to check whether flat_type and month have been extracted successfully.
+
+```{r}
+unique(rs_subset$month)
+```
+
+```{r}
+unique(rs_subset$flat_type)
+```
+
+glimpse() function will be used to view the overall resale transactions available for 3 room flat in Singapore.
+
+```{r}
+glimpse(rs_subset)
+```
+
+From the glimpse() function result, we can see that from Jan 2021 to December 2022, there are 23,656 transactions for 3 room flat in Singapore.
+
+## 3.2 Transforming HDB Resale Data Columns
+
+Here, *mutate* function of dplyr package will be used to create columns such as:
+
+-   **`address`**: concatenation of the **`block`** and **`street_name`** columns using *paste()* function of **base R** package. **`remaining_lease_yr`** & **`remaining_lease_mth`**: split the **year** and **months** part of the **`remaining_lease`** respectively using *str_sub()* function of **stringr** package then converting the character to integer using *as.integer()* function of **base R** package. After performing mutate function, we will store the new data in **`rs_transform`**
+
+```{r}
+rs_transform <- rs_subset %>%
+  mutate(rs_subset, address = paste(block,street_name)) %>%
+  mutate(rs_subset, remaining_lease_yr = as.integer(str_sub(remaining_lease, 0, 2)))%>%
+  mutate(rs_subset, remaining_lease_mth = as.integer(str_sub(remaining_lease, 9, 11)))
+```
+
+```{r}
+head(rs_transform)
+```
+
+### 3.2.1 Sum remaining lease in months
+
+There are some NA values in remaining lease months with value of 0. We need to multiply the **remaining_lease_yr** by 12 to convert into months. The **remaining_lease_mths** column will be created using mutate function of dplyr package which contains the summation of the remaining_lease_yr and remaining_lease_mths using rowSums() of R package.
+
+```{r}
+rs_transform$remaining_lease_mth[is.na(rs_transform$remaining_lease_mth)] <- 0
+rs_transform$remaining_lease_yr <- rs_transform$remaining_lease_yr * 12
+rs_transform <- rs_transform %>% 
+  mutate(rs_transform, remaining_lease_mths = rowSums(rs_transform[, c("remaining_lease_yr", "remaining_lease_mth")])) %>%
+  select(month, town, address, block, street_name, flat_type, storey_range, floor_area_sqm, flat_model, 
+         lease_commence_date, remaining_lease_mths, resale_price)
+```
+
+```{r}
+head(rs_transform)
+```
+
+## 3.3 Retrieval of Addresses & its Coordinates
+
+Data such as postal codes and coordinates of the addresses is required to get the proximity to various location factors later on.
+
+### 3.3.1 Creaion of unique list of addresses
+
+Unique addresses will be created and stored in **add_list**. unique() function of base R package will be used to extract the unique addresses and sort() function of R package to sort the unique vector.
+
+```{r}
+add_list <- sort(unique(rs_transform$address))
+```
+
+### 3.3.2 Creation of function to retrieve Coordinates from OneMapSG API
+
+A dataframe **postal_coords** will be created to store all final retrieved coordinates. The GET() function of **httr** package will be used to perform a GET request to https://developers.onemap.sg/commonapi/search. There are a few search arguments variables and information we have to take note of
+
+-   searchVal: Unique keywords that user will enter to filter results
+
+-   returnGeom {Y/N}: Yes or No to check if user want to return the geometry
+
+-   getAddrDetails {Y/N}: Yes or No to check if user want to return address details for a point
+
+Return JSON response will contain many fields but we are only interested in postal code and coordinates like Longitude and Latitude. A new dataframe new_row will be created and is used to store each final set of coordinates retrieved. There is also the need to check the number of responses because some searched location have 0, some only have 1 result and others have many. Finally, the JSON result will be appended to the dataframe postal_coords using rbind() function of R.
+
+```{r}
+get_coords <- function(add_list){
+  
+  # Create a data frame to store all retrieved coordinates
+  postal_coords <- data.frame()
+    
+  for (i in add_list){
+    #print(i)
+
+    r <- GET('https://developers.onemap.sg/commonapi/search?',
+           query=list(searchVal=i,
+                     returnGeom='Y',
+                     getAddrDetails='Y'))
+    data <- fromJSON(rawToChar(r$content))
+    found <- data$found
+    res <- data$results
+    
+    # Create a new data frame for each address
+    new_row <- data.frame()
+    
+    # If single result, append 
+    if (found == 1){
+      postal <- res$POSTAL 
+      lat <- res$LATITUDE
+      lng <- res$LONGITUDE
+      new_row <- data.frame(address= i, postal = postal, latitude = lat, longitude = lng)
+    }
+    
+    # If multiple results, drop NIL and append top 1
+    else if (found > 1){
+      # Remove those with NIL as postal
+      res_sub <- res[res$POSTAL != "NIL", ]
+      
+      # Set as NA first if no Postal
+      if (nrow(res_sub) == 0) {
+          new_row <- data.frame(address= i, postal = NA, latitude = NA, longitude = NA)
+      }
+      
+      else{
+        top1 <- head(res_sub, n = 1)
+        postal <- top1$POSTAL 
+        lat <- top1$LATITUDE
+        lng <- top1$LONGITUDE
+        new_row <- data.frame(address= i, postal = postal, latitude = lat, longitude = lng)
+      }
+    }
+
+    else {
+      new_row <- data.frame(address= i, postal = NA, latitude = NA, longitude = NA)
+    }
+    
+    # Add the row
+    postal_coords <- rbind(postal_coords, new_row)
+  }
+  return(postal_coords)
+}
+```
+
+### 3.3.3 Retrieve resale coordinates using the get_coords function
+
+```{r}
+coords <- get_coords(add_list)
+```
+
+### 3.3.4 Check results
+
+Checking if columns contain any empty values 
+
+```{r}
+coords[(is.na(coords$postal) | is.na(coords$latitude) | is.na(coords$longitude) | coords$postal=="NIL"), ]
+```
+
+The outcome reveals that 215 CHOA CHU KANG CTRL has no postal code but does have available coordinates. The postal code to enter when searching on gothere.sg is 680215.
+
+### 3.3.5 Combination of HDB resale and coordinate data
+
+After getting the coordinates, we must merge them with the HDB resale dataset using the dplyr package's left join() method. The information will be kept in rs coords.
+
+```{r}
+rs_coords <- left_join(rs_transform, coords, by = c('address' = 'address'))
+```
+
+```{r}
+head(rs_coords)
+```
+
+## 3.4 Writing file to rds
+
+```{r}
+rs_coords_rds <- write_rds(rs_coords, "Data/rds/rs_coords.rds")
+```
+
+## 3.5 Reading the rs_coords_rds file
+
+```{r}
+rs_coords <- read_rds("Data/rds/rs_coords.rds")
+glimpse(rs_coords)
+```
+
+### 3.5.1 Transform and Assign CRS
+
+The Latitude & Longitude are in decimal, therefore the projected CRS will be WGS84. We will need to assign the CRS of 4326 first before transforming it to 3414 which is the EPSG code for Singapore SVY21
+
+```{r}
+rs_coords_sf <- st_as_sf(rs_coords,
+                    coords = c("longitude", 
+                               "latitude"),
+                    crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+st_crs(rs_coords_sf)
+```
+
+### 3.5.2 Plotting HDB resale points
+
+```{r}
+tmap_mode("view")
+tm_shape(rs_coords_sf)+
+  tm_dots(col="blue", size = 0.02)
+tmap_mode("plot")
+```
+
+# 4. Importing Geospatial Locational Factors
+
+## 4.1 Location factors with coordinates
+
+### 4.1.1 Reading of location factors
+
+```{r}
+elder_sf <- st_read(dsn = "Data/Geospatial", layer="ELDERCARE")
+mrtlrt_sf <- st_read(dsn = "Data/Geospatial", layer="MRTLRTStnPtt")
+bus_sf <- st_read(dsn = "Data/Geospatial", layer="BusStop")
+hawker_sf <- st_read("Data/Geospatial/hawker-centres-geojson.geojson") 
+supermkt_sf <- st_read("Data/Geospatial/supermarkets-geojson.geojson") 
+chas_sf <- st_read("Data/Geospatial/moh-chas-clinics.geojson")
+childcare_sf <- st_read("Data/Geospatial/childcare.geojson") 
+kind_sf <- st_read("Data/Geospatial/preschools-location.geojson") 
+parks_sf <- st_read("Data/Geospatial/parks-geojson.geojson")
+```
+
+```{r}
+st_crs(elder_sf)
+st_crs(mrtlrt_sf)
+st_crs(bus_sf)
+st_crs(hawker_sf)
+st_crs(supermkt_sf)
+st_crs(chas_sf)
+st_crs(childcare_sf)
+st_crs(kind_sf)
+st_crs(parks_sf)
+```
+
+### 4.1.2 Assign EPSG code to sf dataframes
+
+```{r}
+elder_sf <- st_set_crs(elder_sf, 3414)
+mrtlrt_sf <- st_set_crs(mrtlrt_sf, 3414)
+bus_sf <- st_set_crs(bus_sf, 3414)
+hawker_sf <- hawker_sf %>%
+  st_transform(crs = 3414)
+supermkt_sf <- supermkt_sf %>%
+  st_transform(crs = 3414)
+chas_sf <- chas_sf %>%
+  st_transform(crs = 3414)
+childcare_sf <- childcare_sf %>%
+  st_transform(crs = 3414)
+kind_sf <- kind_sf %>%
+  st_transform(crs = 3414)
+parks_sf <- parks_sf %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+st_crs(elder_sf)
+st_crs(mrtlrt_sf)
+st_crs(bus_sf)
+st_crs(hawker_sf)
+st_crs(supermkt_sf)
+st_crs(chas_sf)
+st_crs(childcare_sf)
+st_crs(kind_sf)
+#st_crs(parks_sf)
+```
+
+```{r}
+length(which(st_is_valid(elder_sf) == FALSE))
+length(which(st_is_valid(mrtlrt_sf) == FALSE))
+length(which(st_is_valid(hawker_sf) == FALSE))
+length(which(st_is_valid(parks_sf) == FALSE))
+length(which(st_is_valid(supermkt_sf) == FALSE))
+length(which(st_is_valid(chas_sf) == FALSE))
+length(which(st_is_valid(childcare_sf) == FALSE))
+length(which(st_is_valid(kind_sf) == FALSE))
+length(which(st_is_valid(bus_sf) == FALSE))
+```
+
+### 4.1.3 Calculating proximity of the locations
+
+The get prox function will be developed to calculate the distances between the site and HDB resale factors.
+
+```{r}
+get_prox <- function(origin_df, dest_df, col_name){
+  
+  # creates a matrix of distances
+  dist_matrix <- st_distance(origin_df, dest_df)           
+  
+  # find the nearest location_factor and create new data frame
+  near <- origin_df %>% 
+    mutate(PROX = apply(dist_matrix, 1, function(x) min(x)) / 1000) 
+  
+  # rename column name according to input parameter
+  names(near)[names(near) == 'PROX'] <- col_name
+
+  return(near)
+}
+```
+
+get_prox function will be called to get the proximity of the resale HDB and location factors such as:
+
+-   Eldercare
+
+-   MRT
+
+-   Hawker
+
+-   Parks
+
+-   Supermarkets
+
+-   CHAS clinics
+
+```{r}
+rs_coords_sf <- get_prox(rs_coords_sf, elder_sf, "PROX_ELDERLYCARE") 
+rs_coords_sf <- get_prox(rs_coords_sf, mrtlrt_sf, "PROX_MRT") 
+rs_coords_sf <- get_prox(rs_coords_sf, hawker_sf, "PROX_HAWKER") 
+rs_coords_sf <- get_prox(rs_coords_sf, parks_sf, "PROX_PARK") 
+rs_coords_sf <- get_prox(rs_coords_sf, supermkt_sf, "PROX_SUPERMARKET")
+rs_coords_sf <- get_prox(rs_coords_sf, chas_sf, "PROX_CHAS")
+```
+
+### 4.1.4 Calculation of location factors within distance
+
+Using the st distance feature of the sf package, the get within function will generate a matrix of distances between the HDB and the location factor. Additionally, it will use the sum() function of the basic R package to acquire the sum of the location factor points that are under the threshold distance before adding it to the HDB resale data under a new column using the modify() function of the dpylr package. Last but not least, it will change the column name in accordance with the input provided by the user so that the columns have appropriate names that are unique from one another.
+
+```{r}
+get_within <- function(origin_df, dest_df, threshold_dist, col_name){
+  
+  # creates a matrix of distances
+  dist_matrix <- st_distance(origin_df, dest_df)   
+  
+  # count the number of location_factors within threshold_dist and create new data frame
+  wdist <- origin_df %>% 
+    mutate(WITHIN_DT = apply(dist_matrix, 1, function(x) sum(x <= threshold_dist)))
+  
+  # rename column name according to input parameter
+  names(wdist)[names(wdist) == 'WITHIN_DT'] <- col_name
+
+  # Return df
+  return(wdist)
+}
+```
+
+#### 4.1.4.1 Calling the function for all location factors
+
+In this instance, we will set the criterion to Within 350m for location parameters such kindergartens, daycare centers, and bus stops.
+
+```{r}
+rs_coords_sf <- get_within(rs_coords_sf, kind_sf, 350, "WITHIN_350M_KINDERGARTEN")
+```
+
+```{r}
+rs_coords_sf <- get_within(rs_coords_sf, childcare_sf, 350, "WITHIN_350M_CHILDCARE")
+```
+
+```{r}
+rs_coords_sf <- get_within(rs_coords_sf, bus_sf, 350, "WITHIN_350M_BUS")
+```
+
+## 4.2 Location factors without coordinates
+
+### 4.2.1 CBD Town Area
+
+Most people commute to the Central Business District on a daily basis for work. Hence, it is a crucial step. The Downtown Core, commonly known as CBD, may be located with a quick google search at latitude and longitude of 1.287953 and 103.851784, respectively.
+
+```{r}
+# Store CBD Coordinates in Dataframe
+name <- c('CBD Area')
+latitude= c(1.287953)
+longitude= c(103.851784)
+cbd_coords <- data.frame(name, latitude, longitude)
+```
+
+Convert data frame into sf object and transform crs
+
+```{r}
+cbd_coords_sf <- st_as_sf(cbd_coords,
+                    coords = c("longitude", 
+                               "latitude"),
+                    crs=4326) %>%
+  st_transform(crs = 3414)
+
+st_crs(cbd_coords_sf)
+```
+
+The get prox function will be used to determine how close the HDB resale units are to the CBD region.
+
+```{r}
+rs_coords_sf <- get_prox(rs_coords_sf, cbd_coords_sf, "PROX_CBD")
+```
+
+### 4.2.2 Shopping Malls Places
+
+We may check the XPaths of the various lists on the wikipedia page. There are numerous lists of retail malls grouped by regions in Singapore.
+
+```{r}
+url <- "https://en.wikipedia.org/wiki/List_of_shopping_malls_in_Singapore"
+malls_list <- list()
+
+for (i in 1:7){
+  malls <- read_html(url) %>%
+    html_nodes(xpath = paste('//*[@id="mw-content-text"]/div[1]/div[',as.character(i),']/ul/li',sep="") ) %>%
+    html_text()
+  malls_list <- append(malls_list, malls)
+}
+
+#malls_list
+```
+
+There are 164 shopping malls to choose from in the malls list result. We must utilize the previously constructed get coords method to search the names of these shopping malls because they don't include their coordinates.
+
+```{r}
+malls_list_coords <- get_coords(malls_list) %>% 
+  rename("mall_name" = "address")
+```
+
+```{r}
+malls_list_coords <- subset(malls_list_coords, mall_name!= "Yew Tee Shopping Centre")
+```
+
+Due to Wikipedia page numbering, we need to change the names of malls that are no longer relevant and malls that have an index beside them, as indicated in the result above.
+
+```{r}
+invalid_malls<- subset(malls_list_coords, is.na(malls_list_coords$postal))
+invalid_malls_list <- unique(invalid_malls$mall_name)
+corrected_malls <- c("Clarke Quay", "City Gate", "Raffles Holland V", "Knightsbridge", "Mustafa Centre", "GR.ID", "Shaw House",
+                     "The Poiz Centre", "Velocity @ Novena Square", "Singapore Post Centre", "PLQ Mall", "KINEX", "The Grandstand")
+
+for (i in 1:length(invalid_malls_list)) {
+  malls_list_coords <- malls_list_coords %>% 
+    mutate(mall_name = ifelse(as.character(mall_name) == invalid_malls_list[i], corrected_malls[i], as.character(mall_name)))
+}
+```
+
+```{r}
+malls_list <- sort(unique(malls_list_coords$mall_name))
+```
+
+```{r}
+malls_coords <- get_coords(malls_list)
+```
+
+To check if the malls still have any NA values
+
+```{r}
+malls_coords[(is.na(malls_coords$postal) | is.na(malls_coords$latitude) | is.na(malls_coords$longitude)), ]
+```
+
+To convert the mall dataframe into SF object and perform transformation of CRS
+
+```{r}
+malls_sf <- st_as_sf(malls_coords,
+                    coords = c("longitude", 
+                               "latitude"),
+                    crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+To retrieve proximity between the HDB resale flats and Shopping Malls
+
+```{r}
+rs_coords_sf <- get_prox(rs_coords_sf, malls_sf, "PROX_MALL") 
+```
+
+### 4.2.3 Primary Schools
+
+To extract and retrieve only primary schools data
+
+```{r}
+pri_sch <- read_csv("Data/Aspatial/general-information-of-schools.csv")
+
+pri_sch <- pri_sch %>%
+  filter(mainlevel_code == "PRIMARY") %>%
+  select(school_name, address, postal_code, mainlevel_code)
+
+glimpse(pri_sch)
+```
+
+There are 183 Primary Schools in Singapore.
+
+To create a list to store postal code of the schools and retrieve the coordinates
+
+```{r}
+prisch_list <- sort(unique(pri_sch$postal_code))
+prisch_coords <- get_coords(prisch_list)
+```
+
+To check if the primary schools still have any NA values
+
+```{r}
+prisch_coords[(is.na(prisch_coords$postal) | is.na(prisch_coords$latitude) | is.na(prisch_coords$longitude)), ]
+```
+
+To combine coordinates with the schools
+
+```{r}
+prisch_coords = prisch_coords[c("postal","latitude", "longitude")]
+pri_sch <- left_join(pri_sch, prisch_coords, by = c('postal_code' = 'postal'))
+```
+
+To convert primary schools dataframe into SF object and perform transformation of CRS
+
+```{r}
+prisch_sf <- st_as_sf(pri_sch,
+                    coords = c("longitude", 
+                               "latitude"),
+                    crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+To obtain schools within a proximity of 1km
+
+```{r}
+rs_coords_sf <- get_within(rs_coords_sf, prisch_sf, 1000, "WITHIN_1KM_PRISCH")
+```
+
+### 4.2.4 Proximity to Good Primary Schools
+
+One website in particular that we may use to find reputable primary schools in Singapore is www.salary.sg, which ranks schools based on how well-liked they are. The code that we used to extract the rankings of Singapore's shopping centers may also be used to retrieve the rankings of elementary schools.
+
+```{r}
+url <- "https://www.salary.sg/2021/best-primary-schools-2021-by-popularity/"
+
+good_pri <- data.frame()
+
+schools <- read_html(url) %>%
+  html_nodes(xpath = paste('//*[@id="post-3068"]/div[3]/div/div/ol/li') ) %>%
+  html_text() 
+
+for (i in (schools)){
+  sch_name <- toupper(gsub(" – .*","",i))
+  sch_name <- gsub("\\(PRIMARY SECTION)","",sch_name)
+  sch_name <- trimws(sch_name)
+  new_row <- data.frame(pri_sch_name=sch_name)
+  # Add the row
+  good_pri <- rbind(good_pri, new_row)
+}
+
+top_good_pri <- head(good_pri, 10)
+
+head(top_good_pri)
+```
+
+To determine whether the names of the retrieved top primary schools correspond to those already present in the primary school dataframe
+
+```{r}
+top_good_pri$pri_sch_name[!top_good_pri$pri_sch_name %in% prisch_sf$school_name]
+
+#Unique list to store good school names
+good_pri_list <- unique(top_good_pri$pri_sch_name)
+
+```
+
+To obtain the coordinates of good primary schools
+
+```{r}
+goodprisch_coords <- get_coords(good_pri_list)
+```
+
+To check for NA values
+
+```{r}
+goodprisch_coords[(is.na(goodprisch_coords$postal) | is.na(goodprisch_coords$latitude) | is.na(goodprisch_coords$longitude)), ]
+```
+
+Renaming to match the primary school dataframe names
+
+```{r}
+top_good_pri$pri_sch_name[top_good_pri$pri_sch_name == "CHIJ ST. NICHOLAS GIRLS’ SCHOOL"] <- "CHIJ SAINT NICHOLAS GIRLS' SCHOOL"
+top_good_pri$pri_sch_name[top_good_pri$pri_sch_name == "ST. HILDA’S PRIMARY SCHOOL"] <- "SAINT HILDA'S PRIMARY SCHOOL"
+
+#Unique list to store good school names
+good_pri_list <- unique(top_good_pri$pri_sch_name)
+
+#To obtain the coordinates of good primary schools
+goodprisch_coords <- get_coords(good_pri_list)
+```
+
+Final inspection to check for NA values
+
+```{r}
+goodprisch_coords[(is.na(goodprisch_coords$postal) | is.na(goodprisch_coords$latitude) | is.na(goodprisch_coords$longitude)), ]
+```
+
+To do CRS transformation and turn the good primary schools dataframe into SF object
+
+```{r}
+goodpri_sf <- st_as_sf(goodprisch_coords,
+                    coords = c("longitude", 
+                               "latitude"),
+                    crs=4326) %>%
+  st_transform(crs = 3414)
+
+st_crs(goodpri_sf)
+```
+
+The get prox function will be used to determine how close good primary schools are to HDB resale units.
+
+```{r}
+rs_coords_sf <- get_prox(rs_coords_sf, goodpri_sf, "PROX_GOOD_PRISCH")
+```
+
+## 4.3 Filtering dataset
+
+```{r}
+rs_coords_sf_training <-  filter(rs_coords_sf ,flat_type == "3 ROOM") %>% 
+              filter(month >= "2021-01" & month <= "2023-02")
+```
+
+### 4.3.1 Writing to RDS file
+
+```{r}
+rs_factors_rds_training <- write_rds(rs_coords_sf_training, "Data/rds/rs_factors_training.rds")
+```
+
+# 5. Import Data for Analysis
+
+## 5.1 Geospatial Data
+
+Here, st_read of sf package to read simple features or layers from file.
+
+```{r}
+mpsz_sf <- st_read(dsn = "Data/Geospatial", layer="MPSZ-2019")
+mpsz_sf <- st_transform(mpsz_sf, 3414)
+```
+
+R object used to contain the imported MPSZ-2019 shapefile is called mpsz_sf and it is a simple feature object. The correct EPSG code for SVY21 should be 3414 therefore a transformation is done above.
+
+### 5.1.1 Check for invalid geometry and handle it
+
+```{r}
+length(which(st_is_valid(mpsz_sf) == FALSE))
+```
+
+Making the invalid geometry valid by using st_make_valid function
+
+```{r}
+mpsz_sf <- st_make_valid(mpsz_sf)
+length(which(st_is_valid(mpsz_sf) == FALSE))
+```
+
+Now the geometry is valid.
+
+## 5.2 Aspatial Data for HDB resale location factors
+
+```{r}
+rs_factors_training <- read_rds("Data/rds/rs_factors_training.rds")
+```
+
+## 5.3 Extract storey_order due to character type
+
+```{r}
+storeys <- sort(unique(rs_factors_training$storey_range))
+# Create dataframe storey_range_order to store order of storey_range
+storey_order <- 1:length(storeys)
+storey_range_order <- data.frame(storeys, storey_order)
+
+# Combine storey_order with resale dataframe for training and testing data
+rs_factors_training <- left_join(rs_factors_training, storey_range_order, by= c("storey_range" = "storeys"))
+```
+
+## 5.4 Selecting required columns for analysis
+
+```{r}
+rs_factors_training <- rs_factors_training %>%
+  select(resale_price, floor_area_sqm, storey_order, remaining_lease_mths,
+         PROX_CBD, PROX_ELDERLYCARE, PROX_HAWKER, PROX_MRT, PROX_PARK, PROX_GOOD_PRISCH, PROX_MALL, PROX_CHAS,
+         PROX_SUPERMARKET, WITHIN_350M_KINDERGARTEN, WITHIN_350M_CHILDCARE, WITHIN_350M_BUS, WITHIN_1KM_PRISCH)
+```
+
+# 6. Exploratory Data Analysis
+
+## 6.1 HDB 3 room resale prices in Histogram
+
+```{r}
+ggplot(data=rs_factors_training, aes(x=`resale_price`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+
+The findings demonstrate a right-skewed distribution. This indicates that more resale HDB units were sold for an average price of around $500,000. Log transformation can statistically normalize the skewed distribution, which is what we'll be performing in the following part.
+
+## 6.2 Normalize HDB 3 room resale prices using Log Transformation in Histogram
+
+By applying a log transformation on the resale price variable, a new variable called LOG RESALE PRICE is created.
+
+```{r}
+rs_factors_training <- rs_factors_training %>%
+  mutate(`LOG_SELLING_PRICE` = log(resale_price))
+```
+
+Replot Histogram of LOG_RESALE_PRICE
+
+```{r}
+ggplot(data=rs_factors_training, aes(x=`LOG_SELLING_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="green")
+```
+
+The change has reduced the skewedness of the distribution.
+
+## 6.3 Various histogram distribution of structural variables
+
+Next, we'll look at a few structural variables, like floor area, storey order, and remaining lease months.
+
+```{r}
+s_factor <- c("floor_area_sqm","remaining_lease_mths", "storey_order")
+```
+
+The structural variables of the histogram will be saved in a list.
+
+```{r}
+s_factor_hist_list <- vector(mode = "list", length = length(s_factor))
+for (i in 1:length(s_factor)) {
+  hist_plot <- ggplot(rs_factors_training, aes_string(x = s_factor[[i]])) +
+    geom_histogram(color="firebrick", fill = "light coral") +
+    labs(title = s_factor[[i]]) +
+    theme(plot.title = element_text(size = 10),
+          axis.title = element_blank())
+  
+  s_factor_hist_list[[i]] <- hist_plot
+}
+```
+
+Visualizing the distribution of structural variables using a histogram
+
+```{r}
+ggarrange(plotlist = s_factor_hist_list,
+          ncol = 2,
+          nrow = 2)
+```
+
+Only the floor area sqm findings from the histogram appear to have a normal distribution. The resale HDBs and flat type are typically on the lower floors since the histogram of storey order is skewed to the right. There are a few patterns of common transactions involving 600 to 800 months and 1100 months for the remaining lease mths. This demonstrates that there are more sales of resale apartments with at least 66 years left on the lease.
+
+## 6.4 Various histogram of location variables
+
+Extraction of location factors column names to plot
+
+```{r}
+l_factor <- c("PROX_CBD", "PROX_ELDERLYCARE", "PROX_HAWKER", "PROX_MRT", "PROX_PARK", "PROX_GOOD_PRISCH", "PROX_MALL", "PROX_CHAS",
+              "PROX_SUPERMARKET", "WITHIN_350M_KINDERGARTEN", "WITHIN_350M_CHILDCARE", "WITHIN_350M_BUS", "WITHIN_1KM_PRISCH")
+```
+
+Similarly, a list will be created to store the histogram location variables
+
+```{r}
+l_factor_hist_list <- vector(mode = "list", length = length(l_factor))
+for (i in 1:length(l_factor)) {
+  hist_plot <- ggplot(rs_factors_training, aes_string(x = l_factor[[i]])) +
+    geom_histogram(color="midnight blue", fill = "light sky blue") +
+    labs(title = l_factor[[i]]) +
+    theme(plot.title = element_text(size = 10),
+          axis.title = element_blank())
+  
+  l_factor_hist_list[[i]] <- hist_plot
+}
+```
+
+Plotting histogram to visualise distribution of location variables
+
+```{r}
+ggarrange(plotlist = l_factor_hist_list,
+          ncol = 3,
+          nrow = 5)
+```
+
+There are several trends in PROX_GOOD_PRISCH that indicate that more transactions occur within a 3 kilometer radius. PROX_CBD has characteristics of a normal distribution.
+
+Additional variables like WITHIN 350M KINDERGARTEN, WITHIN 350M CHILDCARE, PROX_SUPERMARKET, PROX HAWKER, PROX_MRT, PROX_MALL, PROX_CHAS, and WITHIN _350M_KINDERGARTEN are skewed to the right. This demonstrates that there are more resale transactions taking place and that locals favor staying close to resale apartments with these advantages.
+
+## 6.5 Statistical Point Map
+
+```{r}
+tmap_mode("view")
+tm_shape(rs_factors_training) +  
+  tm_dots(col = "resale_price",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14)) +
+tm_basemap("OpenStreetMap")
+
+tmap_mode("plot")
+```
+
+The darker orange points on the interactive map show that the resale prices of 3 room HDBs in the North-East, South, and Central tend to be higher. In contrast, notice how the lighter yellow dots are grouped together around the North and East.
+
+# 7. Data Sampling of Training and Testing Data
+
+The full collection of data is divided into two sets: a training set from 2021-01 to 2022-12 and a test set from 2023-01 to 2023-02. Initial split() from the rsample package can be used to accomplish this. One of the tidymodels packages is rsample.
+
+Due to time restrictions, training will be done using data from 6 months (2022-07 to 2022-12).
+
+```{r}
+set.seed(1234)
+rs_coords_sf <-  filter(rs_factors_rds_training,flat_type == "3 ROOM") %>% 
+              filter(month >= "2022-07" & month <= "2023-02")
+resale_split <- initial_split(rs_coords_sf[,8:26], 
+                              prop = 7.5/10,)
+
+train_data <- training(resale_split)
+test_data <- testing(resale_split)
+```
+
+## 7.1 Computing Correlation Matrix
+
+```{r}
+rs_coords_sf_nogeo <- rs_coords_sf %>%
+  st_drop_geometry()
+corrplot::corrplot(cor(rs_coords_sf_nogeo[, 14:26]), 
+                   diag = FALSE, 
+                   order = "AOE",
+                   tl.pos = "td", 
+                   tl.cex = 0.5, 
+                   method = "number", 
+                   type = "upper")
+```
+
+With the exception of WITHIN 350M CHILDCARE, which has a value of 0.92, the correlation matrix above demonstrates that all correlation values are below 0.8. This demonstrates a multicolinearity between WITHIN 350M CHILDCARE and WTIHIN 350M KINDERGARTEN.
+
+## 7.2 Building a non-spatial multiple linear regression
+
+```{r}
+price_mlr <- lm(resale_price ~ floor_area_sqm +
+                  remaining_lease_mths +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH,
+                data=train_data)
+summary(price_mlr)
+```
+
+## 7.3 Geographically Weighted Regression Predictive Method
+
+Using the GWmodel package's geographically weighted regression approach to calibrate a model to predict HDB resale price.
+
+Converting the sf data.frame to SpatialPointDataFrame
+
+```{r}
+train_data_sp <- as_Spatial(train_data)
+train_data_sp
+```
+
+Computing adaptive bandwidth
+
+The best bandwidth to utilize will then be determined using bw.gwr() of the GWmodel package.
+
+```{r}
+bw_adaptive <- bw.gwr(resale_price ~ floor_area_sqm +
+                  remaining_lease_mths +
+                  PROX_CBD + PROX_ELDERLYCARE + PROX_HAWKER +
+                  PROX_MRT + PROX_PARK + PROX_MALL + 
+                  PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                  WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                  WITHIN_1KM_PRISCH,
+                  data=train_data_sp,
+                  approach="CV",
+                  kernel="gaussian",
+                  adaptive=TRUE,
+                  longlat=FALSE)
+```
+
+The outcome indicates that, if adaptive bandwidth is employed for this data collection, 29 neighbor points will represent the ideal bandwidth to be used.
+
+Constructing the adaptive bandwidth GWR model
+
+```{r}
+gwr_adaptive <- gwr.basic(formula = resale_price ~
+                            floor_area_sqm +
+                            remaining_lease_mths + PROX_CBD + 
+                            PROX_ELDERLYCARE + PROX_HAWKER +
+                            PROX_MRT + PROX_PARK + PROX_MALL + 
+                            PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                            WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                            WITHIN_1KM_PRISCH,
+                          data=train_data_sp,
+                          bw=bw_adaptive, 
+                          kernel = 'gaussian', 
+                          adaptive=TRUE,
+                          longlat = FALSE)
+
+gwr_adaptive
+```
+
+## 7.4 Preparing Coordinates Data
+
+The code snippet below extracts the complete, training, and test data sets' x, y coordinates.
+
+```{r}
+coords <- st_coordinates(rs_coords_sf)
+coords_train <- st_coordinates(train_data)
+coords_test <- st_coordinates(test_data)
+```
+
+Dropping Geometry Field
+
+The geometry column of the sf data will be deleted. frame using the sf package's st drop geometry() function.
+
+```{r}
+train_data <- train_data %>% 
+  st_drop_geometry()
+```
+
+## 7.5 Calibrating Random Forest Model
+
+Using the ranger package's random forest function, a model to forecast HDB resale price will be calibrated in this part.
+
+```{r}
+set.seed(1234)
+rf <- ranger(resale_price ~ floor_area_sqm + 
+               remaining_lease_mths + PROX_CBD + PROX_ELDERLYCARE + 
+               PROX_HAWKER + PROX_MRT + PROX_PARK + PROX_MALL + 
+               PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+               WITHIN_350M_CHILDCARE + WITHIN_350M_BUS + 
+               WITHIN_1KM_PRISCH,
+             data=train_data)
+```
+
+```{r}
+print(rf)
+```
+
+## 7.6 Calibrating Geographical Random Forest Model
+
+In this section, a model to predict HDB resale price will be calibrated using the grf() function from the SpatialML package.
+
+### 7.6.1 Calibrating using training data.
+
+The code chunk below calibrate a geographic random forest model by using grf() of SpatialML package.
+
+```{r}
+set.seed(1234)
+gwRF_adaptive <- grf(formula = resale_price ~ floor_area_sqm +
+                       remaining_lease_mths + PROX_CBD + PROX_ELDERLYCARE +
+                       PROX_HAWKER + PROX_MRT + PROX_PARK + PROX_MALL +
+                       PROX_SUPERMARKET + WITHIN_350M_KINDERGARTEN +
+                       WITHIN_350M_CHILDCARE + WITHIN_350M_BUS +
+                       WITHIN_1KM_PRISCH,
+                     dframe=train_data, 
+                     bw=29,
+                     kernel="adaptive",
+                     coords=coords_train)
+```
+
+```{r}
+write_rds(gwRF_adaptive, "Data/rds/gwRF_adaptive.rds")
+gwRF_adaptive <- read_rds("Data/rds/gwRF_adaptive.rds")
+```
+
+### 7.6.2 Predicting using Test Data
+
+The test data and its accompanying coordinates data will be combined using the code chunk below.
+
+Preparing the test data
+
+```{r}
+test_data <- cbind(test_data, coords_test) %>%
+  st_drop_geometry()
+```
+
+Predicting with test data
+
+The next step is to use the test data and the previously calibrated gwRF adaptive model to estimate the resale value using predict.grf() of the spatialML package.
+
+```{r}
+gwRF_pred <- predict.grf(gwRF_adaptive, 
+                           test_data, 
+                           x.var.name="X",
+                           y.var.name="Y", 
+                           local.w=1,
+                           global.w=0)
+```
+
+Before moving on, let us save the output into rds file for future use.
+
+```{r}
+GRF_pred <- write_rds(gwRF_pred, "Data/rds/GRF_pred.rds")
+GRF_pred
+```
+
+Converting the predicting output into a data frame
+
+A vector of predicted values is the result of the predict.grf() function. In order to further visualize and analyze it, it is better to transform it into a data frame.
+
+```{r}
+GRF_pred <- read_rds("Data/rds/GRF_pred.rds")
+GRF_pred_df <- as.data.frame(GRF_pred)
+```
+
+In the following code block, test data is appended with the expected values using cbind().
+
+```{r}
+test_data_p <- cbind(test_data, GRF_pred_df)
+```
+
+```{r}
+write_rds(test_data_p, "Data/rds/test_data_p.rds")
+```
+
+### 7.6.3 Calculating Root Mean Square Error
+
+We can gauge how far predicted values are from observed values in a regression study using the root mean square error (RMSE). The RMSE is calculated in the code snippet below using the Metrics package's rmse() function.
+
+```{r}
+rmse(test_data_p$resale_price, 
+     test_data_p$GRF_pred)
+```
+
+The spatial regression prediction model is shown to be pretty close to the test data resale prices by the RMSE value of 32313.2. Better fit is indicated by a lower RMSE.
+
+### 7.6.4 Visualising the predicted values
+
+The code chunk below can also be used to see the actual selling price and the anticipated resale price using a scatterplot.
+
+```{r}
+ggplot(data = test_data_p,
+       aes(x = GRF_pred,
+           y = resale_price)) +
+  geom_point()
+```
+
+The scatterplot visualization shows that, if a linear relationship between the predicted and actual resale prices is drawn, they are not far apart. The visualization reveals that the majority of plots are located in the $400,000 scatter area.
